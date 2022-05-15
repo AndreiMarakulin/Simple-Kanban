@@ -8,6 +8,7 @@ exports.up = async (knex) => {
     table.string("login", 256).notNullable().unique().index();
     table.string("password", 2048).notNullable();
     table.string("name", 2048);
+    table.string("role", 256).notNullable();
     table
       .timestamp("created_at", { useTz: false })
       .notNullable()
@@ -17,7 +18,7 @@ exports.up = async (knex) => {
 
   await knex.schema.createTable("board", (table) => {
     table.increments("id").primary;
-    table.string("title", 2048).notNullable().unique();
+    table.string("title", 2048).notNullable();
     table.string("description");
     table.integer("owner_id").references("user.id");
     table
@@ -47,6 +48,7 @@ exports.up = async (knex) => {
     table.string("title", 2048).notNullable();
     table.integer("author_id").references("user.id");
     table.string("description");
+    table.integer("list_id").references("list.id");
     table.integer("category_id").references("category.id");
     table.timestamp("deadline", { useTz: false });
     table
@@ -55,22 +57,16 @@ exports.up = async (knex) => {
       .defaultTo(knex.fn.now());
     table.timestamp("updated_at", { useTz: false }).nullable();
   });
-  
+
   await knex.schema.createTable("user_board", (table) => {
     table.increments("id").primary;
     table.integer("user_id").references("user.id");
     table.integer("board_id").references("board.id");
   });
-  
-  await knex.schema.createTable("board_list", (table) => {
+
+  await knex.schema.createTable("board_card", (table) => {
     table.increments("id").primary;
     table.integer("board_id").references("board.id");
-    table.integer("list_id").references("list.id");
-  });
-  
-  await knex.schema.createTable("list_card", (table) => {
-    table.increments("id").primary;
-    table.integer("list_id").references("list.id");
     table.integer("card_id").references("card.id");
   });
 };
@@ -80,12 +76,11 @@ exports.up = async (knex) => {
  * @returns { Promise<void> }
  */
 exports.down = async (knex) => {
-  await knex.raw(`DROP TABLE "user" CASCADE`);
-  await knex.raw(`DROP TABLE "board" CASCADE`);
-  await knex.raw(`DROP TABLE "list" CASCADE`);
-  await knex.raw(`DROP TABLE "card" CASCADE`);
-  await knex.raw(`DROP TABLE "category" CASCADE`);
+  await knex.schema.dropTable("board_card");
   await knex.schema.dropTable("user_board");
-  await knex.schema.dropTable("board_list");
-  await knex.schema.dropTable("list_card");
+  await knex.schema.dropTable("card");
+  await knex.schema.dropTable("category");
+  await knex.schema.dropTable("list");
+  await knex.schema.dropTable("board");
+  await knex.schema.dropTable("user");
 };
