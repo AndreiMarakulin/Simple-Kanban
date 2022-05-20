@@ -1,4 +1,3 @@
-const res = require("express/lib/response");
 const ApiError = require("../error/ApiError");
 const boardModel = require("../model/boardModel");
 const userModel = require("../model/userModel");

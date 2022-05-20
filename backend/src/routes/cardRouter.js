@@ -1,11 +1,12 @@
 const { Router } = require("express");
+const cardColtroller = require("../controllers/cardColtroller");
 
 const router = Router();
 
-router.get("/");
-router.get("/:id");
-router.post("/");
-router.put("/:id");
-router.delete("/:id");
+router.post("/", cardColtroller.create);
+router.get("/", cardColtroller.getAll);
+router.get("/:cardId", cardColtroller.getOneById);
+router.put("/:cardId", cardColtroller.update);
+// router.delete("/:cardId", cardColtroller.delete);
 
 module.exports = router;
