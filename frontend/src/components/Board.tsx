@@ -1,3 +1,4 @@
+import { observer } from "mobx-react-lite";
 import React, { FC } from "react";
 import { Card } from "react-bootstrap";
 import { Store, useStore } from "../store";
@@ -26,4 +27,4 @@ const Board: FC = () => {
   );
 };
 
-export default Board;
+export default observer(Board);

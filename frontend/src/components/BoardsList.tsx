@@ -3,7 +3,7 @@ import { ListGroup, ListGroupItem } from "react-bootstrap";
 import { useStore, Store } from "../store";
 import { IBoard } from "../store/boardStore";
 
-const BoardsList = observer(() => {
+const BoardsList = () => {
   const store: Store = useStore();
 
   return (
@@ -15,6 +15,7 @@ const BoardsList = observer(() => {
             key={board.id}
             onClick={() => {
               store.BoardStore.setCurrentBoard(board);
+              store.CardStore.getCards(board.id);
             }}
           >
             {board.title}
@@ -23,6 +24,6 @@ const BoardsList = observer(() => {
       </ListGroup>
     </div>
   );
-});
+};
 
-export default BoardsList;
+export default observer(BoardsList);
