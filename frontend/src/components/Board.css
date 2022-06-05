@@ -1,0 +1,12 @@
+.myCard {
+    width: 300px;
+    height: 150px;
+}
+
+.cardList {
+    display: flex;
+    width: 700px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px
+}
