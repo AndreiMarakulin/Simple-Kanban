@@ -47,10 +47,10 @@ class CardCotroller {
    * @return {Promise<void>}
    */
   async getAll(req, res, next) {
-    const { listId } = req.query;
+    const { listId, boardId } = req.query;
     try {
       // TODO check if list with listId exists
-      const data = await cardModel.get(listId);
+      const data = await cardModel.get(listId, boardId);
       res.json(data);
     } catch (err) {
       next(err);

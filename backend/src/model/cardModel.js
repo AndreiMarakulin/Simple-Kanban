@@ -7,6 +7,7 @@ class CardModel {
     authorLogin: "u.login",
     description: "c.description",
     listTitel: "l.title",
+    boardId: "bc.board_id",
     categoryTitle: "cat.title",
     deadline: "c.deadline",
     createdAt: "c.created_at",
@@ -47,18 +48,23 @@ class CardModel {
 
   /**
    * Получение всех карточек
-   * @param {?string} listId
+   * @param {?number} listId
+   * @param {?number} boardId
    * @returns {import('knex').Knex.QueryBuilder<*, *>}
    */
-  get = (listId = null) => {
+  get = (listId, boardId) => {
     const query = db
       .select(this.#fileds)
       .from({ c: "card" })
       .leftJoin({ u: "user" }, { "c.author_id": "u.id" })
       .leftJoin({ l: "list" }, { "c.list_id": "l.id" })
-      .leftJoin({ cat: "category" }, { "c.category_id": "cat.id" });
+      .leftJoin({ cat: "category" }, { "c.category_id": "cat.id" })
+      .leftJoin({ bc: "board_card" }, { "c.id": "bc.card_id" });
     if (listId) {
       query.where({ "c.list_id": listId });
+    }
+    if (boardId) {
+      query.where({ "bc.board_id": boardId });
     }
     query.orderBy("id");
     return query;
