@@ -1,4 +1,5 @@
-import {makeAutoObservable} from 'mobx';
+import {flow, makeAutoObservable} from 'mobx';
+import { getAPI } from '../utils/api';
 
 export interface IBoard {
   id: number;
@@ -10,40 +11,21 @@ export interface IBoard {
 }
 
 export class BoardStore {
-  boards: IBoard[] = [
-    {
-      id: 1,
-      title: "board1",
-      description: "Sample board 1",
-      owner_id: 1,
-      created_at: "2022-05-15T07:45:33.000Z",
-      updated_at: null,
-    },
-    {
-      id: 2,
-      title: "board2",
-      description: "Sample board 2",
-      owner_id: 2,
-      created_at: "2022-05-15T07:45:33.000Z",
-      updated_at: null,
-    },
-    {
-      id: 3,
-      title: "Change title",
-      description: "New descriptioghfhgfn",
-      owner_id: 2,
-      created_at: "2022-05-15T16:16:46.646Z",
-      updated_at: "2022-05-15T11:50:34.027Z",
-    },
-  ];
+  boards: IBoard[] = [];
   currentBoard: IBoard | undefined;
 
   constructor() {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      getBoards: flow,
+    });
+    this.getBoards();
+    // TODO получить доску по умолчанию после загрузки приложения
+    // this.currentBoard = this.boards[0];
   }
 
-  setBoards(boards: IBoard[]) {
-    this.boards = boards;
+  *getBoards(): Generator<Promise<IBoard[]>, void, IBoard[]> {
+    const result = yield getAPI("boards");
+    this.boards = result;
   }
 
   setCurrentBoard(board: IBoard) {
