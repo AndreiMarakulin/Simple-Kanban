@@ -9,6 +9,6 @@ router.get("/:boardId/users", boardController.getBoardUsers);
 router.get("/:boardId", boardController.getOne);
 router.put("/:boardId/addUser", boardController.addBoardUser);
 router.put("/:boardId", boardController.updateBoard);
-// router.delete("/:id");
+router.delete("/:boardId", boardController.deleteBoard);
 
 module.exports = router;

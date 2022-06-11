@@ -16,6 +16,7 @@ export interface ICard {
 
 export class CardStore {
   cards: ICard[] = [];
+  lists: string[] = [];
 
   constructor() {
     makeAutoObservable(this, {
@@ -23,8 +24,20 @@ export class CardStore {
     });
   }
 
-  *getCards(boardId: number): Generator<Promise<ICard[]>, void, ICard[]> {
+  *getCards(boardId: number | undefined): Generator<Promise<ICard[]>, void, ICard[]> {
+    if (!boardId) return;
     const result = yield getAPI("cards", { boardId: boardId.toString() });
     this.cards = result;
+    this.lists = this.getLists();
+  }
+
+  getLists(): string[] {
+    const listSet = new Set<string>();
+    this.cards.forEach((card) => {
+      if (card.listTitel) {
+        listSet.add(card.listTitel);
+      }
+    });
+    return Array.from(listSet);
   }
 }

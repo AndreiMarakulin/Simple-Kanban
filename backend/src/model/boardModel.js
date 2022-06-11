@@ -8,6 +8,7 @@ class BoardModel {
     owner_id: "b.owner_id",
     created_at: "b.created_at",
     updated_at: "b.updated_at",
+    deleted_at: "b.deleted_at",
   };
 
   /**
@@ -37,6 +38,7 @@ class BoardModel {
       query.leftJoin({ ub: "user_board" }, { "b.id": "ub.board_id" });
       query.where({ "ub.user_id": user_id });
     }
+    query.whereNull("b.deleted_at");
     return query;
   }
 
@@ -44,18 +46,28 @@ class BoardModel {
     return db.first(this.#fileds).from({ b: "board" }).where({ id: board_id });
   }
 
-  async updateBoard(boardId, {title, description, owner_id}) {
-    const [board] = await db 
-    .update({
-      updated_at: new Date().toISOString(),
-      ...title ? {title} : {},
-      ...description ? {description} : {},
-      ...owner_id ? {owner_id} : {},
-    })
-    .table({b: 'board'})
-    .where({id: boardId})
-    .returning(this.#fileds)
-    return board
+  async updateBoard(boardId, { title, description, owner_id }) {
+    const [board] = await db
+      .update({
+        updated_at: new Date().toISOString(),
+        ...(title ? { title } : {}),
+        ...(description ? { description } : {}),
+        ...(owner_id ? { owner_id } : {}),
+      })
+      .table({ b: "board" })
+      .where({ id: boardId })
+      .returning(this.#fileds);
+    return board;
+  }
+
+  async deleteBoard(boardId) {
+    await db
+      .update({
+        deleted_at: new Date().toISOString(),
+      })
+      .table({ b: "board" })
+      .where({ id: boardId });
+    return;
   }
 
   getUsersByBoardId(board_id) {
@@ -67,7 +79,7 @@ class BoardModel {
       })
       .from({ ub: "user_board" })
       .leftJoin({ u: "user" }, { "ub.user_id": "u.id" })
-      .where({'ub.board_id': board_id});
+      .where({ "ub.board_id": board_id });
     return query;
   }
 
@@ -80,7 +92,6 @@ class BoardModel {
       .into("user_board");
     return;
   }
-
 }
 
 module.exports = new BoardModel();

@@ -17,9 +17,27 @@ exports.seed = async function (knex) {
   await knex.raw(`TRUNCATE TABLE "category" RESTART IDENTITY CASCADE`);
 
   await knex("user").insert([
-    { login: "admin", password: await bcrypt.hash("admin", 5), name: "admin", role: 'ADMIN' },
-    { login: "user1", password: await bcrypt.hash("user1", 5), name: "user1", role: 'USER' },
-    { login: "user2", password: await bcrypt.hash("user2", 5), name: "user2", role: 'USER' },
+    {
+      login: "admin",
+      password: await bcrypt.hash("admin", 5),
+      name: "admin",
+      role: "ADMIN",
+      status: "ACTIVE",
+    },
+    {
+      login: "user1",
+      password: await bcrypt.hash("user1", 5),
+      name: "user1",
+      role: "USER",
+      status: "ACTIVE",
+    },
+    {
+      login: "user2",
+      password: await bcrypt.hash("user2", 5),
+      name: "user2",
+      role: "USER",
+      status: "ACTIVE",
+    },
   ]);
 
   await knex("board").insert([
@@ -46,18 +64,9 @@ exports.seed = async function (knex) {
   ]);
 
   await knex("list").insert([
-    {
-      title: "ToDo",
-      created_at: new Date().toUTCString(),
-    },
-    {
-      title: "In Progress",
-      created_at: new Date().toUTCString(),
-    },
-    {
-      title: "Done",
-      created_at: new Date().toUTCString(),
-    },
+    { title: "ToDo" },
+    { title: "In Progress" },
+    { title: "Done" },
   ]);
 
   await knex("category").insert([
@@ -85,7 +94,8 @@ exports.seed = async function (knex) {
   await knex("board_card").insert(
     Array.from({ length: 30 }).map((_, idx) => {
       return {
-        card_id: idx + 1, board_id: getRndInteger(1, 3),
+        card_id: idx + 1,
+        board_id: getRndInteger(1, 3),
       };
     })
   );

@@ -104,6 +104,27 @@ class BoardController {
   }
 
   /**
+   * Удаление канбан-доски
+   * @type {import('express').RequestHandler}
+   */
+  async deleteBoard(req, res, next) {
+    const { boardId } = req.params;
+    try {
+      const board = await boardModel.getOne(boardId);
+      if (!board) {
+        return next(
+          ApiError.badRequest(`Board with id ${boardId} does not exist`)
+        );
+      }
+
+      await boardModel.deleteBoard(boardId);
+      res.status(200).send();
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
    * Получение участников канбан-доски
    * @type {import('express').RequestHandler}
    */
@@ -116,7 +137,6 @@ class BoardController {
       next(err);
     }
   }
-
 
   /**
    * Добавление пользователя к канбан-доске

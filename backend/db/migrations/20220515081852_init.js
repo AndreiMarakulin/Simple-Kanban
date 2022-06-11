@@ -9,11 +9,13 @@ exports.up = async (knex) => {
     table.string("password", 2048).notNullable();
     table.string("name", 2048);
     table.string("role", 256).notNullable();
+    table.string("status", 256).notNullable();
     table
       .timestamp("created_at", { useTz: false })
       .notNullable()
       .defaultTo(knex.fn.now());
     table.timestamp("updated_at", { useTz: false }).nullable();
+    table.timestamp("deleted_at", { useTz: false }).nullable().index();
   });
 
   await knex.schema.createTable("board", (table) => {
@@ -26,16 +28,12 @@ exports.up = async (knex) => {
       .notNullable()
       .defaultTo(knex.fn.now());
     table.timestamp("updated_at", { useTz: false }).nullable();
+    table.timestamp("deleted_at", { useTz: false }).nullable().index();
   });
 
   await knex.schema.createTable("list", (table) => {
     table.increments("id").primary;
     table.string("title", 2048).notNullable();
-    table
-      .timestamp("created_at", { useTz: false })
-      .notNullable()
-      .defaultTo(knex.fn.now());
-    table.timestamp("updated_at", { useTz: false }).nullable();
   });
 
   await knex.schema.createTable("category", (table) => {
@@ -56,6 +54,7 @@ exports.up = async (knex) => {
       .notNullable()
       .defaultTo(knex.fn.now());
     table.timestamp("updated_at", { useTz: false }).nullable();
+    table.timestamp("deleted_at", { useTz: false }).nullable().index();
   });
 
   await knex.schema.createTable("user_board", (table) => {

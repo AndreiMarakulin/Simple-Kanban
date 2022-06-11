@@ -1,5 +1,5 @@
 import {flow, makeAutoObservable} from 'mobx';
-import { getAPI } from '../utils/api';
+import { deleteAPI, getAPI, postAPI } from '../utils/api';
 
 export interface IBoard {
   id: number;
@@ -13,14 +13,14 @@ export interface IBoard {
 export class BoardStore {
   boards: IBoard[] = [];
   currentBoard: IBoard | undefined;
+  createBoardVisibility: boolean = false;
 
   constructor() {
     makeAutoObservable(this, {
       getBoards: flow,
+      createBoard: flow,
+      deleteBoard: flow,
     });
-    this.getBoards();
-    // TODO получить доску по умолчанию после загрузки приложения
-    // this.currentBoard = this.boards[0];
   }
 
   *getBoards(): Generator<Promise<IBoard[]>, void, IBoard[]> {
@@ -28,7 +28,33 @@ export class BoardStore {
     this.boards = result;
   }
 
+  // FIXME types
+  *createBoard(data: any): Generator<Promise<IBoard>, void, IBoard> {
+    const result = yield postAPI("boards", {
+      title: data.title,
+      description: data.description,
+      owner_id: data.authorId,
+    });
+    if (result) {
+      this.boards.push(result);
+    }
+  }
+
+  *deleteBoard(boardId: number): Generator<Promise<boolean>, void, boolean> {
+    if (yield deleteAPI(`boards/${boardId}`)) {
+      this.boards = this.boards.filter(board => board.id !== boardId);
+    }
+  }
+
   setCurrentBoard(board: IBoard) {
     this.currentBoard = board;
+  }
+
+  showCreateBoardForm(): void {
+    this.createBoardVisibility = true;
+  }
+
+  hideCreateBoardForm(): void {
+    this.createBoardVisibility = false;
   }
 }
