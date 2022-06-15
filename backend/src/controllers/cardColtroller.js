@@ -11,7 +11,7 @@ class CardCotroller {
    * @return {Promise<void>}
    */
   async create(req, res, next) {
-    const { title, description, authorId, listId, categoryId, deadline } =
+    const { title, description, boardId, authorId, listId, categoryId, deadline } =
       req.body;
     try {
       if (!title || !authorId) {
@@ -24,10 +24,12 @@ class CardCotroller {
         );
       }
       // TODO check if list with listId exists
+      // TODO check if board with boardId exists
       // TODO check if category with categoryId exists
       const data = await cardModel.create(
         title,
         description,
+        boardId,
         authorId,
         listId,
         categoryId,

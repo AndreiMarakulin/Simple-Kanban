@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
-import { BoardStore } from "./boardStore";
-import { CardStore } from "./cardStore";
+import { BoardStore } from "./BoardStore";
+import { CardStore } from "./CardStore";
 
 class Store {
     BoardStore: BoardStore;

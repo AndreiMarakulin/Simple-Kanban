@@ -1,17 +1,27 @@
 import { flow, makeAutoObservable } from "mobx";
-import { getAPI } from "../utils/api";
+import { getAPI, postAPI } from "../utils/api";
 
 export interface ICard {
   id: number;
   title: string;
   authorLogin: string;
-  description: string | null;
-  listTitel: string | null;
+  description: string | undefined;
+  listTitel: string;
   boardId: number;
-  categoryTitle: string | null;
-  deadline: string | null;
+  categoryTitle: string | undefined;
+  deadline: number | undefined;
   createdAt: string;
-  updatedAt: string | null;
+  updatedAt: string | undefined;
+}
+
+export interface INewCard {
+  title: string;
+  authorId: number;
+  boardId: number;
+  description: string | undefined;
+  categoryId: number | undefined;
+  listId: number;
+  deadline: string | undefined;
 }
 
 export class CardStore {
@@ -29,6 +39,14 @@ export class CardStore {
     const result = yield getAPI("cards", { boardId: boardId.toString() });
     this.cards = result;
     this.lists = this.getLists();
+  }
+
+  *createCard(newCard: INewCard): Generator<Promise<ICard>, void, ICard> {
+    const result = yield postAPI("cards", newCard);
+    console.log(result);
+    if (result) {
+      this.cards.push({...result, listTitel: "Done", boardId: newCard.boardId, authorLogin: "admin"});
+    }
   }
 
   getLists(): string[] {

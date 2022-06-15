@@ -1,24 +1,26 @@
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
-import { ListGroup, ListGroupItem } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Button, ListGroup, ListGroupItem } from "react-bootstrap";
 import { Store, useStore } from "../store";
-import { IBoard } from "../store/boardStore";
-import CreateBoard from "./createBoardModal";
+import { IBoard } from "../store/BoardStore";
+import CreateBoard from "./modals/CreateBoardModal";
 import { ReactComponent as DeleteIcon } from "../assets/delete.svg";
 
 const BoardsList = () => {
   const store: Store = useStore();
+  const [createBoardVisible, setCreateBoardVisible] = useState(false)
+
   useEffect(() => {
-    const test = async () => {
+    const initBoardList = async () => {
       await store.BoardStore.getBoards();
       store.BoardStore.setCurrentBoard(store.BoardStore.boards[0]);
       store.CardStore.getCards(store.BoardStore.currentBoard?.id);
     };
-    test();
+    initBoardList();
   }, [store.BoardStore, store.CardStore]);
 
   return (
-    <div>
+    <div style={{display: "flex", flexDirection: "column"}}>
       <ListGroup>
         {store.BoardStore?.boards.map((board: IBoard) => (
           <ListGroupItem
@@ -46,13 +48,15 @@ const BoardsList = () => {
           </ListGroupItem>
         ))}
       </ListGroup>
-      <ListGroupItem
-        className="newBoard"
-        onClick={() => store.BoardStore.showCreateBoardForm()}
+      <Button
+        // className="newBoard"
+        style={{ marginTop: "10px" }}
+        variant="outline-primary"
+        onClick={() => setCreateBoardVisible(true)}
       >
-        Новая доска
-      </ListGroupItem>
-      <CreateBoard />
+        + Новая доска
+      </Button>
+      <CreateBoard isShown={createBoardVisible} onHide={() => setCreateBoardVisible(false)}/>
     </div>
   );
 };

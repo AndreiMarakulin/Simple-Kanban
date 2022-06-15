@@ -27,6 +27,7 @@ class CardModel {
   create = async (
     title,
     description,
+    boardId,
     authorId,
     listId,
     categoryId,
@@ -43,6 +44,13 @@ class CardModel {
       })
       .into({ c: "card" })
       .returning(["id", "created_at"]);
+
+    await db
+      .insert({
+        card_id: id,
+        board_id: boardId,
+      })
+      .into("board_card");
     return { id, title, createdAt };
   };
 
