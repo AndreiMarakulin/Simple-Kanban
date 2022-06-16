@@ -1,12 +1,12 @@
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Button, ListGroup, ListGroupItem } from "react-bootstrap";
 import { Store, useStore } from "../store";
 import { IBoard } from "../store/BoardStore";
 import CreateBoard from "./modals/CreateBoardModal";
 import { ReactComponent as DeleteIcon } from "../assets/delete.svg";
 
-const BoardsList = () => {
+const BoardsList: FC = () => {
   const store: Store = useStore();
   const [createBoardVisible, setCreateBoardVisible] = useState(false)
 

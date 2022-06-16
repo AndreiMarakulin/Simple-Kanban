@@ -6,7 +6,7 @@ class CardModel {
     title: "c.title",
     authorLogin: "u.login",
     description: "c.description",
-    listTitel: "l.title",
+    listId: "c.list_id",
     boardId: "bc.board_id",
     categoryTitle: "cat.title",
     deadline: "c.deadline",
