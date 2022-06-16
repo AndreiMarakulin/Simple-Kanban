@@ -170,6 +170,17 @@ class BoardController {
       next(err);
     }
   }
+
+  async getCardOrder(req, res, next) {
+    try {
+      const { boardId } = req.params;
+      const data = await boardModel.getCardOrder(boardId);
+      console.log(data);
+      res.json(data);
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = new BoardController();

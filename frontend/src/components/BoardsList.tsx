@@ -14,7 +14,8 @@ const BoardsList: FC = () => {
     const initBoardList = async () => {
       await store.BoardStore.getBoards();
       store.BoardStore.setCurrentBoard(store.BoardStore.boards[0]);
-      store.CardStore.getCards(store.BoardStore.currentBoard?.id);
+      if (store.BoardStore.currentBoard)
+      store.CardStore.getCardsAndOrder(store.BoardStore.currentBoard.id);
     };
     initBoardList();
   }, [store.BoardStore, store.CardStore]);
@@ -28,7 +29,7 @@ const BoardsList: FC = () => {
             key={board.id}
             onClick={() => {
               store.BoardStore.setCurrentBoard(board);
-              store.CardStore.getCards(board.id);
+              store.CardStore.getCardsAndOrder(board.id);
             }}
             className="boardList__board"
           >

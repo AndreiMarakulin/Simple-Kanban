@@ -1,5 +1,5 @@
 import { DraggableLocation } from "@react-forked/dnd";
-import { flow, makeAutoObservable } from "mobx";
+import { flow, makeAutoObservable, runInAction } from "mobx";
 import { getAPI, postAPI } from "../utils/api";
 
 export interface ICard {
@@ -33,33 +33,23 @@ export interface IList {
 
 export class CardStore {
   cards: ICard[] = [];
-  lists: IList[] = [
-    { id: 1, title: "ToDo", cardOrder: [] },
-    { id: 2, title: "In Progress", cardOrder: [] },
-    { id: 3, title: "Done", cardOrder: [] },
-  ];
+  lists: IList[] = [];
 
   constructor() {
     makeAutoObservable(this, {
-      getCards: flow,
       createCard: flow,
     });
   }
 
-  *getCards(
-    boardId: number | undefined
-  ): Generator<Promise<ICard[]>, void, ICard[]> {
+  async getCardsAndOrder(boardId: number) {
     if (!boardId) return;
-    const result = yield getAPI("cards", { boardId: boardId.toString() });
-    this.cards = result;
-    this.getCardOrder();
-  }
-
-  getCardOrder(): void {
-    this.lists.forEach((list) => {
-      this.cards
-        .filter((card) => card.listId === list.id)
-        .map((card) => list.cardOrder.push(card.id));
+    const [cards, lists] = await Promise.all([
+      getAPI("cards", { boardId: boardId.toString() }) as Promise<ICard[]>,
+      getAPI(`boards/${boardId}/cardOrder`) as Promise<IList[]>,
+    ]);
+    runInAction(() => {
+      this.cards = cards;
+      this.lists = lists;
     });
   }
 
@@ -68,11 +58,15 @@ export class CardStore {
     source: DraggableLocation,
     draggableId: string
   ): void {
-    const sourceList = this.lists.find((list) => list.id === Number(source.droppableId));
+    const sourceList = this.lists.find(
+      (list) => list.id === Number(source.droppableId)
+    );
     if (sourceList === undefined) {
       throw new TypeError("sourceList is undefined");
     }
-    const destinationList = this.lists.find((list) => list.id === Number(destination.droppableId));
+    const destinationList = this.lists.find(
+      (list) => list.id === Number(destination.droppableId)
+    );
     if (destinationList === undefined) {
       throw new TypeError("destinationList is undefined");
     }
@@ -87,6 +81,7 @@ export class CardStore {
       // TODO Почему при push mobx не перерисовывает компонент??
       this.cards.push({
         ...result,
+        listId: newCard.listId,
         boardId: newCard.boardId,
         authorLogin: "admin",
       });

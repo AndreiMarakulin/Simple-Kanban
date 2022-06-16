@@ -68,6 +68,14 @@ exports.up = async (knex) => {
     table.integer("board_id").references("board.id");
     table.integer("card_id").references("card.id");
   });
+
+  // TODO как правильно хранить порядок карточек в листе?
+  await knex.schema.createTable("card_order", (table) => {
+    table.increments("id").primary;
+    table.integer("board_id").references("board.id").index();
+    table.integer("list_id").references("list.id").index();
+    table.specificType("order", "INT[]");
+  })
 };
 
 /**
@@ -75,6 +83,7 @@ exports.up = async (knex) => {
  * @returns { Promise<void> }
  */
 exports.down = async (knex) => {
+  await knex.schema.dropTable("card_order");
   await knex.schema.dropTable("board_card");
   await knex.schema.dropTable("user_board");
   await knex.schema.dropTable("card");

@@ -1,9 +1,19 @@
 const API_URL = "http://localhost:3001/api/";
 
 const getAPI = async (path: string, params?: Record<string, string>) => {
-  const URLparams = new URLSearchParams(params);
-  const response = await fetch(`${API_URL}${path}?${URLparams.toString()}`);
-  return await response.json();
+  let response: Response
+  if (!params) {
+    response = await fetch(`${API_URL}${path}`);
+  } else {
+    const URLparams = new URLSearchParams(params);
+    response = await fetch(`${API_URL}${path}?${URLparams.toString()}`);
+  }
+  if (response.status >= 400) {
+    console.log(response);
+    return null;
+  } else {
+    return await response.json();
+  }
 };
 
 const postAPI = async (path: string, body: Object) => {

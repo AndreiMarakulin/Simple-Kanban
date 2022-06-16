@@ -6,6 +6,7 @@ const router = Router();
 router.post("/", boardController.create);
 router.get("/", boardController.getAll);
 router.get("/:boardId/users", boardController.getBoardUsers);
+router.get("/:boardId/cardOrder", boardController.getCardOrder);
 router.get("/:boardId", boardController.getOne);
 router.put("/:boardId/addUser", boardController.addBoardUser);
 router.put("/:boardId", boardController.updateBoard);

@@ -4,6 +4,33 @@ function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
+cards = [];
+
+// TODO - refactor this function
+async function getCardOrder(cards) {
+  temp = {};
+  cards.map((card) => {
+    if (!temp[card.boardId]) {
+      temp[card.boardId] = {};
+    }
+    if (!temp[card.boardId][card.listId]) {
+      temp[card.boardId][card.listId] = [];
+    }
+    temp[card.boardId][card.listId].push(card.cardId);
+  });
+  result = [];
+  Object.keys(temp).map((boardId) => {
+    Object.keys(temp[boardId]).map((listId) => {
+      result.push({
+        board_id: boardId,
+        list_id: listId,
+        order: temp[boardId][listId],
+      });
+    });
+  });
+  return result;
+}
+
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
@@ -77,11 +104,13 @@ exports.seed = async function (knex) {
 
   await knex("card").insert(
     Array.from({ length: 30 }).map((_, idx) => {
+      const listId = getRndInteger(1, 4);
+      cards.push({ boardId: getRndInteger(1, 3), listId, cardId: idx + 1 });
       return {
         title: `Task ${idx + 1}`,
         description: `This is sample task ${idx + 1}`,
         author_id: getRndInteger(1, 4),
-        list_id: getRndInteger(1, 4),
+        list_id: listId,
         category_id: getRndInteger(1, 4),
         deadline: new Date(
           new Date().getTime() + getRndInteger(1, 20) * 24 * 60 * 60 * 1000
@@ -92,11 +121,18 @@ exports.seed = async function (knex) {
   );
 
   await knex("board_card").insert(
-    Array.from({ length: 30 }).map((_, idx) => {
+    cards.map((card) => {
       return {
-        card_id: idx + 1,
-        board_id: getRndInteger(1, 3),
+        card_id: card.cardId,
+        board_id: card.boardId,
       };
+    })
+  );
+
+  const CardOrder = await getCardOrder(cards);
+  await knex("card_order").insert(
+    await CardOrder.map((item) => {
+      return item;
     })
   );
 };

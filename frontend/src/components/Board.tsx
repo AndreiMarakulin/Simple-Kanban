@@ -1,13 +1,13 @@
 import { observer } from "mobx-react-lite";
 import { FC, useState } from "react";
 import { Button, Container } from "react-bootstrap";
-import { Store, useStore } from "../store";
+import { useStore } from "../store";
 import CreateCardModal from "./modals/CreateCardModal";
 import { DragDropContext, Droppable, DropResult } from "@react-forked/dnd";
 import List from "./List";
 
 const Board: FC = () => {
-  const store: Store = useStore();
+  const {CardStore} = useStore();
   // FIXME задваивание модальных окон
   const [createCardVisible, setCreateCardVisible] = useState(false);
 
@@ -23,13 +23,13 @@ const Board: FC = () => {
     ) {
       return
     }
-    store.CardStore.changeCardOrder(destination, source, draggableId)
+    CardStore.changeCardOrder(destination, source, draggableId)
   };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Container className="cardList">
-        {store.CardStore.lists.map((list) => (
+        {CardStore.lists.map((list) => (
           <div key={list.id} className="list">
             <div className="listTitle">{list.title}</div>
             <Droppable droppableId={list.id.toString()}>
@@ -52,4 +52,6 @@ const Board: FC = () => {
   );
 };
 
+
+// TODO https://egghead.io/lessons/react-persist-list-reordering-with-react-beautiful-dnd-using-the-ondragend-callback
 export default observer(Board);

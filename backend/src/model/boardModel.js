@@ -92,6 +92,18 @@ class BoardModel {
       .into("user_board");
     return;
   }
+
+  getCardOrder(boardId) {
+    return db
+      .select({
+        id: "l.id",
+        title: "l.title",
+        cardOrder: "co.order",
+      })
+      .from({ co: "card_order" })
+      .leftJoin({ l: "list" }, { "co.list_id": "l.id" })
+      .where({ "co.board_id": boardId });
+  }
 }
 
 module.exports = new BoardModel();
