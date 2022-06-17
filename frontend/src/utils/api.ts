@@ -31,6 +31,22 @@ const postAPI = async (path: string, body: Object) => {
   }
 };
 
+const putAPI = async (path: string, body: Object) => {
+  const response = await fetch(`${API_URL}${path}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (response.status >= 400) {
+    console.log(response);
+    return null;
+  } else {
+    return await response.json();
+  }
+};
+
 const deleteAPI = async (path: string): Promise<boolean> => {
   const response = await fetch(`${API_URL}${path}`, {
     method: "DELETE",
@@ -42,4 +58,4 @@ const deleteAPI = async (path: string): Promise<boolean> => {
   }
 };
 
-export { getAPI, postAPI, deleteAPI };
+export { getAPI, postAPI, putAPI, deleteAPI };

@@ -104,6 +104,16 @@ class BoardModel {
       .leftJoin({ l: "list" }, { "co.list_id": "l.id" })
       .where({ "co.board_id": boardId });
   }
+
+  async updateCardOrder(boardId, listId, cardOrder) {
+    await db
+      .update({
+        order: cardOrder,
+      })
+      .table({ co: "card_order" })
+      .where({ "co.board_id": boardId, "co.list_id": listId });
+    return;
+  }
 }
 
 module.exports = new BoardModel();

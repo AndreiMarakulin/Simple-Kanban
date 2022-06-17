@@ -175,8 +175,29 @@ class BoardController {
     try {
       const { boardId } = req.params;
       const data = await boardModel.getCardOrder(boardId);
-      console.log(data);
       res.json(data);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async updateCardOrder(req, res, next) {
+    try {
+      const { boardId } = req.params;
+      const { sourceList, destinationList } = req.body;
+      await Promise.all([
+        boardModel.updateCardOrder(
+          boardId,
+          sourceList.id,
+          sourceList.cardOrder
+        ),
+        boardModel.updateCardOrder(
+          boardId,
+          destinationList.id,
+          destinationList.cardOrder
+        )
+      ]);
+      res.json({ success: true });
     } catch (err) {
       next(err);
     }

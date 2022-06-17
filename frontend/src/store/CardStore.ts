@@ -1,6 +1,6 @@
 import { DraggableLocation } from "@react-forked/dnd";
 import { flow, makeAutoObservable, runInAction } from "mobx";
-import { getAPI, postAPI } from "../utils/api";
+import { getAPI, postAPI, putAPI } from "../utils/api";
 
 export interface ICard {
   id: number;
@@ -53,11 +53,12 @@ export class CardStore {
     });
   }
 
-  changeCardOrder(
+  async changeCardOrder(
     destination: DraggableLocation,
     source: DraggableLocation,
-    draggableId: string
-  ): void {
+    draggableId: string,
+    boardId: number
+  ): Promise<void> {
     const sourceList = this.lists.find(
       (list) => list.id === Number(source.droppableId)
     );
@@ -72,6 +73,16 @@ export class CardStore {
     }
     sourceList.cardOrder.splice(source.index, 1);
     destinationList.cardOrder.splice(destination.index, 0, Number(draggableId));
+    await putAPI(`boards/${boardId}/cardOrder`, {
+      sourceList: {
+        id: sourceList.id,
+        cardOrder: sourceList.cardOrder,
+      },
+      destinationList: {
+        id: destinationList.id,
+        cardOrder: destinationList.cardOrder,
+      },
+    });
   }
 
   *createCard(newCard: INewCard): Generator<Promise<ICard>, void, ICard> {
@@ -85,6 +96,9 @@ export class CardStore {
         boardId: newCard.boardId,
         authorLogin: "admin",
       });
+      this.lists
+        .find((list) => list.id === newCard.listId)!
+        .cardOrder.push(result.id);
     }
   }
 }

@@ -9,6 +9,7 @@ router.get("/:boardId/users", boardController.getBoardUsers);
 router.get("/:boardId/cardOrder", boardController.getCardOrder);
 router.get("/:boardId", boardController.getOne);
 router.put("/:boardId/addUser", boardController.addBoardUser);
+router.put("/:boardId/cardOrder", boardController.updateCardOrder);
 router.put("/:boardId", boardController.updateBoard);
 router.delete("/:boardId", boardController.deleteBoard);
 

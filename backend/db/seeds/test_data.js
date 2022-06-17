@@ -8,27 +8,16 @@ cards = [];
 
 // TODO - refactor this function
 async function getCardOrder(cards) {
-  temp = {};
-  cards.map((card) => {
-    if (!temp[card.boardId]) {
-      temp[card.boardId] = {};
+  const cardOrder = [];
+  for (let card of cards) {
+    const boardList = cardOrder.find((elem) => elem.board_id === card.boardId && elem.list_id === card.listId)
+    if (boardList) {
+      boardList.order.push(card.cardId);
+    } else {
+      cardOrder.push({ board_id: card.boardId, list_id: card.listId, order: [card.cardId] });
     }
-    if (!temp[card.boardId][card.listId]) {
-      temp[card.boardId][card.listId] = [];
-    }
-    temp[card.boardId][card.listId].push(card.cardId);
-  });
-  result = [];
-  Object.keys(temp).map((boardId) => {
-    Object.keys(temp[boardId]).map((listId) => {
-      result.push({
-        board_id: boardId,
-        list_id: listId,
-        order: temp[boardId][listId],
-      });
-    });
-  });
-  return result;
+  }
+  return cardOrder
 }
 
 /**

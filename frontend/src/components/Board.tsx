@@ -7,7 +7,7 @@ import { DragDropContext, Droppable, DropResult } from "@react-forked/dnd";
 import List from "./List";
 
 const Board: FC = () => {
-  const {CardStore} = useStore();
+  const {BoardStore, CardStore} = useStore();
   // FIXME задваивание модальных окон
   const [createCardVisible, setCreateCardVisible] = useState(false);
 
@@ -23,7 +23,9 @@ const Board: FC = () => {
     ) {
       return
     }
-    CardStore.changeCardOrder(destination, source, draggableId)
+    if (BoardStore.currentBoard) {
+      CardStore.changeCardOrder(destination, source, draggableId, BoardStore.currentBoard.id)
+    }
   };
 
   return (
