@@ -22,7 +22,7 @@ export interface INewCard {
   description: string | undefined;
   categoryId: number | undefined;
   listId: number;
-  deadline: string | undefined;
+  deadline: number;
 }
 
 export interface IList {
@@ -73,6 +73,7 @@ export class CardStore {
     }
     sourceList.cardOrder.splice(source.index, 1);
     destinationList.cardOrder.splice(destination.index, 0, Number(draggableId));
+    // TODO Переделать на WS
     await putAPI(`boards/${boardId}/cardOrder`, {
       sourceList: {
         id: sourceList.id,
@@ -87,9 +88,7 @@ export class CardStore {
 
   *createCard(newCard: INewCard): Generator<Promise<ICard>, void, ICard> {
     const result = yield postAPI("cards", newCard);
-    console.log(result);
     if (result) {
-      // TODO Почему при push mobx не перерисовывает компонент??
       this.cards.push({
         ...result,
         listId: newCard.listId,

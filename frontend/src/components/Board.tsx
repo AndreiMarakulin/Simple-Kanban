@@ -5,11 +5,17 @@ import { useStore } from "../store";
 import CreateCardModal from "./modals/CreateCardModal";
 import { DragDropContext, Droppable, DropResult } from "@react-forked/dnd";
 import List from "./List";
+import { IList } from "../store/CardStore";
 
 const Board: FC = () => {
   const {BoardStore, CardStore} = useStore();
-  // FIXME задваивание модальных окон
   const [createCardVisible, setCreateCardVisible] = useState(false);
+  const [currentList, setCurrentList] = useState<IList | null>(null);
+
+  const setCreateCardVisiblity = (flag:boolean, list: IList): void => {
+    setCurrentList(list);
+    setCreateCardVisible(flag);
+  }
 
   const onDragEnd = (result: DropResult): void => {
     const { destination, source, draggableId } = result;
@@ -31,7 +37,7 @@ const Board: FC = () => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Container className="cardList">
-        {CardStore.lists.map((list) => (
+        {CardStore.lists.map((list, index) => (
           <div key={list.id} className="list">
             <div className="listTitle">{list.title}</div>
             <Droppable droppableId={list.id.toString()}>
@@ -39,16 +45,17 @@ const Board: FC = () => {
                 <List provided={provided} snapshot={snapshot} list={list} />
               )}
             </Droppable>
-            <Button variant="light" onClick={() => setCreateCardVisible(true)}>
+            <Button variant="light" onClick={() => {setCreateCardVisiblity(true, list)}}>
               + Добавить новую карточку
             </Button>
-            <CreateCardModal
-              key={list.id}
-              isShown={createCardVisible}
-              onHide={() => setCreateCardVisible(false)}
-            />
           </div>
         ))}
+        {currentList ? 
+        <CreateCardModal
+          currentList={currentList}
+          isShown={createCardVisible}
+          onHide={() => {setCreateCardVisible(false)}}
+        /> : null}
       </Container>
     </DragDropContext>
   );

@@ -8,7 +8,6 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <StoreContext.Provider value={new Store()}>
-    {/* TODO React.StrictMode это что-такое */}
     <App />
   </StoreContext.Provider>
 );

@@ -1,3 +1,4 @@
+const knex = require("knex");
 const db = require("../utils/db");
 
 class BoardModel {
@@ -102,13 +103,31 @@ class BoardModel {
       })
       .from({ co: "card_order" })
       .leftJoin({ l: "list" }, { "co.list_id": "l.id" })
-      .where({ "co.board_id": boardId });
+      .where({ "co.board_id": boardId })
+      .orderBy(["co.board_id", "co.list_id"]);
+  }
+
+  async addCardOrder(boardId, listId) {
+    await db
+      .insert({ board_id: boardId, list_id: listId, order: [] })
+      .into("card_order")
+    return;
   }
 
   async updateCardOrder(boardId, listId, cardOrder) {
     await db
       .update({
         order: cardOrder,
+      })
+      .table({ co: "card_order" })
+      .where({ "co.board_id": boardId, "co.list_id": listId });
+    return;
+  }
+
+  async appendToCardOrder(boardId, listId, cardId) {
+    await db
+      .update({
+        order: db.raw("array_append(co.order, ?)", [cardId]),
       })
       .table({ co: "card_order" })
       .where({ "co.board_id": boardId, "co.list_id": listId });

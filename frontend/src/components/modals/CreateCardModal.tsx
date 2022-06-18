@@ -1,10 +1,18 @@
 import { observer } from "mobx-react-lite";
-import { FC, useState } from "react";
-import { Button, Form, Modal, FloatingLabel } from "react-bootstrap";
-import { INewCard } from "../../store/CardStore";
-import { Store, useStore } from "../../store";
+import React, { FC, useState } from "react";
+import {
+  Button,
+  Form,
+  Modal,
+  FloatingLabel,
+  InputGroup,
+} from "react-bootstrap";
+import { IList, INewCard } from "../../store/CardStore";
+import { useStore } from "../../store";
+import { DateTime } from "luxon";
 
 interface ModalProps {
+  currentList: IList;
   isShown: boolean;
   onHide: () => void;
 }
@@ -16,22 +24,24 @@ const defaultCard: INewCard = {
   description: undefined,
   categoryId: undefined,
   listId: NaN,
-  deadline: undefined,
+  deadline: Number(new Date()),
 };
 
-const CreateCard: FC<ModalProps> = ({ isShown, onHide }) => {
-  const store: Store = useStore();
+const CreateCard: FC<ModalProps> = ({ currentList, isShown, onHide }) => {
+  const { BoardStore, CardStore } = useStore();
   const [newCard, setNewCard] = useState<INewCard>(defaultCard);
+  const [enterDeadline, setEnterDeadline] = useState(false);
 
   const closeModal = () => {
     setNewCard(defaultCard);
+    setEnterDeadline(false);
     onHide();
   };
 
   return (
     <Modal show={isShown} onHide={closeModal} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Новая карточка</Modal.Title>
+        <Modal.Title>Новая задача</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -75,21 +85,33 @@ const CreateCard: FC<ModalProps> = ({ isShown, onHide }) => {
               value={isNaN(newCard.authorId) ? "" : newCard.authorId}
             />
           </FloatingLabel>
-          <FloatingLabel className="mb-3" label="listId">
-            <Form.Control
-              type="text"
-              placeholder="Enter listId"
-              onChange={(e) =>
-                setNewCard({
-                  ...newCard,
-                  listId: e.target.value !== "" ? Number(e.target.value) : NaN,
-                })
-              }
-              value={isNaN(newCard.listId) ? "" : newCard.listId}
-            />
+          <FloatingLabel
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setNewCard({
+                ...newCard,
+                listId: e.target.value !== "" ? Number(e.target.value) : NaN,
+              })
+            }
+            className="mb-3"
+            label="Статус задачи"
+          >
+            <Form.Select aria-label="Floating label select example">
+              <option key={currentList.id} value={currentList.id}>
+                {currentList.title}
+              </option>
+              {CardStore.lists
+                .filter((list) => list.id !== currentList.id)
+                .map((list) => (
+                  <option key={list.id} value={list.id}>
+                    {list.title}
+                  </option>
+                ))}
+            </Form.Select>
           </FloatingLabel>
+
           <FloatingLabel className="mb-3" label="Категория">
             <Form.Control
+              disabled
               type="text"
               placeholder="Enter categoryId"
               onChange={(e) => {
@@ -103,19 +125,33 @@ const CreateCard: FC<ModalProps> = ({ isShown, onHide }) => {
             />
           </FloatingLabel>
           {/* TODO форматирование даты */}
-          <FloatingLabel className="mb-3" label="deadline">
+          <InputGroup className="mb-3">
+            <InputGroup.Text >Срок исполнения</InputGroup.Text>
+            <InputGroup.Checkbox
+              checked={enterDeadline}
+              onChange={()=> setEnterDeadline(!enterDeadline)}
+              aria-label="enterDeadline"
+            />
             <Form.Control
-              type="text"
+              disabled={!enterDeadline}
+              type="date"
+              min="2000-01-01"
+              max="2099-12-31"
               placeholder="Enter deadline"
               onChange={(e) => {
                 setNewCard({
                   ...newCard,
-                  deadline: e.target.value !== "" ? e.target.value : undefined,
+                  deadline:
+                    e.target.value !== ""
+                      ? DateTime.fromISO(e.target.value).toMillis()
+                      : newCard.deadline,
                 });
               }}
-              value={newCard.deadline || ""}
+              value={DateTime.fromMillis(newCard.deadline).toFormat(
+                "yyyy-MM-dd"
+              )}
             />
-          </FloatingLabel>
+          </InputGroup>
         </Form>
       </Modal.Body>
 
@@ -126,9 +162,15 @@ const CreateCard: FC<ModalProps> = ({ isShown, onHide }) => {
         <Button
           variant="primary"
           onClick={() => {
-            console.log({...newCard, boardId: store.BoardStore.currentBoard ? store.BoardStore.currentBoard.id : 0});
+            console.log({
+              ...newCard,
+              boardId: BoardStore.currentBoard ? BoardStore.currentBoard.id : 0,
+            });
             // FIXME проверка на текущей доски на правильность данных
-            store.CardStore.createCard({...newCard, boardId: store.BoardStore.currentBoard ? store.BoardStore.currentBoard.id : 0});
+            CardStore.createCard({
+              ...newCard,
+              boardId: BoardStore.currentBoard ? BoardStore.currentBoard.id : 0,
+            });
             closeModal();
           }}
         >

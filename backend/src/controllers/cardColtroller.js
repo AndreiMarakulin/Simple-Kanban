@@ -1,4 +1,5 @@
 const ApiError = require("../error/ApiError");
+const boardModel = require("../model/boardModel");
 const cardModel = require("../model/cardModel");
 const userModel = require("../model/userModel");
 
@@ -35,6 +36,7 @@ class CardCotroller {
         categoryId,
         deadline
       );
+      await boardModel.appendToCardOrder(boardId, listId, data.id);
       res.status(201).json(data);
     } catch (err) {
       next(err);

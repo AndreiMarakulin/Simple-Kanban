@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { FC, useState } from "react";
+import React, { FC, useState } from "react";
 import { Button, Form, Modal, FloatingLabel } from "react-bootstrap";
 import { Store, useStore } from "../../store";
 import { INewBoard } from "../../store/BoardStore";

@@ -15,6 +15,12 @@ class BoardController {
         return next(ApiError.badRequest("Owner does not exist"));
       }
       const data = await boardModel.create(title, description, owner_id);
+      await Promise.all([
+        boardModel.addUserToBoard(owner_id, data.id),
+        boardModel.addCardOrder(data.id, 1),
+        boardModel.addCardOrder(data.id, 2),
+        boardModel.addCardOrder(data.id, 3),
+      ])
       res.status(201).json(data);
     } catch (err) {
       next(err);

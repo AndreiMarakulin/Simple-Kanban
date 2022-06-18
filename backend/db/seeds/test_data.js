@@ -6,7 +6,6 @@ function getRndInteger(min, max) {
 
 cards = [];
 
-// TODO - refactor this function
 async function getCardOrder(cards) {
   const cardOrder = [];
   for (let card of cards) {
