@@ -18,6 +18,12 @@ exports.up = async (knex) => {
     table.timestamp("deleted_at", { useTz: false }).nullable().index();
   });
 
+  await knex.schema.createTable("token", (table) => {
+    table.increments("id").primary();
+    table.integer("user_id").references("user.id");
+    table.string("token").notNullable().unique().index();
+  })
+
   await knex.schema.createTable("board", (table) => {
     table.increments("id").primary;
     table.string("title", 2048).notNullable();

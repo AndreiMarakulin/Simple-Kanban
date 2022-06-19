@@ -1,5 +1,7 @@
 const db = require("../utils/db");
 const bcrypt = require("bcrypt");
+const ApiError = require("../error/ApiError");
+const tokenModel = require("./tokenModel");
 
 class UserModel {
   #fileds = {
@@ -11,26 +13,77 @@ class UserModel {
     updated_at: "updated_at",
   };
 
-  /**
-   * Создание пользователя
-   * @param {string} login
-   * @param {string} password
-   * @param {?string} name
-   * @param {?string} role
-   * @returns {Promise<Object>}
-   */
-  createUser = async (login, password, name = "", role = "USER") => {
-    const [user] = await db
+  async registration(login, password, name = "", role = "USER") {
+    const candidate = await this.getUserByLogin(login, { id: "id" });
+    if (candidate) {
+      throw ApiError.badRequest(`User ${login} already exists`);
+    }
+
+    const [userData] = await db
       .insert({
         login,
         password: await bcrypt.hash(password, 8),
         name,
         role,
+        status: "ACTIVE",
       })
       .into("user")
-      .returning(this.#fileds);
-    return user;
-  };
+      .returning({
+        id: "id",
+        login: "login",
+        name: "name",
+        role: "role",
+      });
+    const tokens = tokenModel.generateTokens(userData);
+    tokenModel.saveTokens(userData.id, tokens.refreshToken);
+    return { ...tokens, user: userData };
+  }
+
+  async login(login, password) {
+    const user = await this.getUserByLogin(login, {
+      id: "id",
+      login: "login",
+      name: "name",
+      password: "password",
+      role: "role",
+    });
+    if (!user) {
+      throw ApiError.badRequest(`User ${login} does not exist`);
+    }
+    const isPasswordEquals = await bcrypt.compare(password, user.password);
+    if (!isPasswordEquals) {
+      throw ApiError.badRequest("Password is incorrect");
+    }
+    const userData = {
+      id: user.id,
+      login: user.login,
+      name: user.name,
+      role: user.role,
+    };
+    const tokens = tokenModel.generateTokens(userData);
+    tokenModel.saveTokens(userData.id, tokens.refreshToken);
+    return { ...tokens, user: userData };
+  }
+
+  async refresh(refreshToken) {
+    if (!refreshToken) {
+      throw ApiError.unauthorized();
+    }
+    const tokenData = await tokenModel.validateRefreshToken(refreshToken);
+    const tokenFromDb = await tokenModel.findToken(refreshToken);
+    if (!tokenData || !tokenFromDb) {
+      throw ApiError.unauthorized();
+    }
+    const userData = await this.getUserById(tokenData.id, {
+      id: "id",
+      login: "login",
+      name: "name",
+      role: "role",
+    });
+    const tokens = tokenModel.generateTokens(userData);
+    tokenModel.saveTokens(userData.id, tokens.refreshToken);
+    return { ...tokens, user: userData };
+  }
 
   /**
    * Получение списка всех пользователей
@@ -63,23 +116,23 @@ class UserModel {
 
   /**
    * Обновление данных пользоателя
-   * @param {int} userId 
-   * @param {Object} updatedParams 
+   * @param {int} userId
+   * @param {Object} updatedParams
    * @returns {Promise<Object>}
    */
-  updateUser = async(userId, { login, password, name, role }) => {
+  updateUser = async (userId, { login, password, name, role }) => {
     const [user] = await db
-    .update({
-      updated_at: new Date().toISOString(),
-      ...(login ? { login } : {}),
-      ...(password ? {password: await bcrypt.hash(password, 8)}  : {}),
-      ...(name ? { name } : {}),
-      ...(role ? { role } : {}),
-    })
-    .table("user")
-    .where({ id: userId })
-    .returning(this.#fileds);
-  return user;
+      .update({
+        updated_at: new Date().toISOString(),
+        ...(login ? { login } : {}),
+        ...(password ? { password: await bcrypt.hash(password, 8) } : {}),
+        ...(name ? { name } : {}),
+        ...(role ? { role } : {}),
+      })
+      .table("user")
+      .where({ id: userId })
+      .returning(this.#fileds);
+    return user;
   };
 }
 

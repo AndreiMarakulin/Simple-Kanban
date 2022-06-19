@@ -1,33 +1,72 @@
 const ApiError = require("../error/ApiError");
+const tokenModel = require("../model/tokenModel");
 const userModel = require("../model/userModel");
 
 class UserController {
-  /**
-   * Создание пользователя
-   * @param {import('express').Request} req
-   * @param {import('express').Response} res
-   * @param {import('express').NextFunction} next
-   * @return {Promise<void>}
-   */
-  create = async (req, res, next) => {
-    const { login, password, name, role } = req.body;
-    if (!login) {
-      return next(ApiError.badRequest(`Missing login!`));
-    }
-    if (!password) {
-      return next(ApiError.badRequest(`Missing password!`));
-    }
+  async registration(req, res, next) {
     try {
-      const userWithLogin = await userModel.getUserByLogin(login, { id: "id" });
-      if (userWithLogin) {
-        return next(ApiError.badRequest(`User ${login} already exists`));
+      const { login, password, name, role } = req.body;
+      if (!login) {
+        return next(ApiError.badRequest(`Missing login!`));
       }
-      const user = await userModel.createUser(login, password, name, role);
-      res.status(201).json(user);
+      if (!password) {
+        return next(ApiError.badRequest(`Missing password!`));
+      }
+      const userData = await userModel.registration(login, password, name, role);
+      res.cookie("refreshToken", userData.refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+      return res.json(userData);
     } catch (err) {
       next(err);
     }
-  };
+  }
+
+  async login(req, res, next) {
+    try {
+      const { login, password } = req.body;
+      const userData = await userModel.login(login, password);
+      res.cookie("refreshToken", userData.refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+      return res.json(userData);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async logout(req, res, next) {
+    try {
+      const { refreshToken } = req.cookies;
+      if (!refreshToken) {
+        throw ApiError.badRequest("User does not login");
+      }
+      await tokenModel.removeToken(refreshToken);
+      res.clearCookie("refreshToken");
+      return res.status(200).send();
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async refresh(req, res, next) {
+    try {
+      const { refreshToken } = req.cookies;
+      if (!refreshToken) {
+        throw ApiError.badRequest("User does not login");
+      }
+      const userData = await userModel.refresh(refreshToken);
+      res.cookie("refreshToken", userData.refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+      return res.json(userData);
+    } catch (err) {
+      next(err);
+    }
+  }
 
   /**
    * Получение всех пользователей
@@ -82,8 +121,13 @@ class UserController {
       if (userWithLogin) {
         return next(ApiError.badRequest(`User ${login} already exists`));
       }
-    const user = await userModel.updateUser(userId, { login, password, name, role })
-    res.json(user)
+      const user = await userModel.updateUser(userId, {
+        login,
+        password,
+        name,
+        role,
+      });
+      res.json(user);
     } catch (err) {
       next(err);
     }
