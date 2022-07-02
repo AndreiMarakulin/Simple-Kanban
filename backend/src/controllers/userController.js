@@ -45,7 +45,7 @@ class UserController {
       }
       await tokenModel.removeToken(refreshToken);
       res.clearCookie("refreshToken");
-      return res.status(200).send();
+      return res.json({}).status(200).send();
     } catch (err) {
       next(err);
     }
@@ -55,7 +55,7 @@ class UserController {
     try {
       const { refreshToken } = req.cookies;
       if (!refreshToken) {
-        throw ApiError.badRequest("User does not login");
+        return res.json({}).status(200).send();
       }
       const userData = await userModel.refresh(refreshToken);
       res.cookie("refreshToken", userData.refreshToken, {

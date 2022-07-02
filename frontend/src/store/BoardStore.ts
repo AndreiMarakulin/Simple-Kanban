@@ -1,5 +1,6 @@
 import { flow, makeAutoObservable } from "mobx";
 import { deleteAPI, getAPI, postAPI } from "../utils/api";
+import { AuthStore } from "./AuthStore";
 
 export interface IBoard {
   id: number;
@@ -17,19 +18,21 @@ export interface INewBoard {
 }
 
 export class BoardStore {
+  AuthStore: AuthStore;
   boards: IBoard[] = [];
   currentBoard: IBoard | undefined;
 
-  constructor() {
+  constructor(AuthStore: AuthStore) {
     makeAutoObservable(this, {
       getBoards: flow,
       createBoard: flow,
       deleteBoard: flow,
     });
+    this.AuthStore = AuthStore;
   }
 
   *getBoards(): Generator<Promise<IBoard[]>, void, IBoard[]> {
-    const result = yield getAPI("boards");
+    const result = yield getAPI("boards", {}, this.AuthStore.token);
     this.boards = result;
   }
 

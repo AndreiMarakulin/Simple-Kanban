@@ -1,6 +1,7 @@
 import { DraggableLocation } from "@react-forked/dnd";
 import { flow, makeAutoObservable, runInAction } from "mobx";
 import { getAPI, postAPI, putAPI } from "../utils/api";
+import { AuthStore } from "./AuthStore";
 
 export interface ICard {
   id: number;
@@ -32,20 +33,22 @@ export interface IList {
 }
 
 export class CardStore {
+  AuthStore: AuthStore;
   cards: ICard[] = [];
   lists: IList[] = [];
 
-  constructor() {
+  constructor(AuthStore: AuthStore) {
     makeAutoObservable(this, {
       createCard: flow,
     });
+    this.AuthStore = AuthStore;
   }
 
   async getCardsAndOrder(boardId: number) {
     if (!boardId) return;
     const [cards, lists] = await Promise.all([
-      getAPI("cards", { boardId: boardId.toString() }) as Promise<ICard[]>,
-      getAPI(`boards/${boardId}/cardOrder`) as Promise<IList[]>,
+      getAPI("cards", { boardId: boardId.toString() }, this.AuthStore.token) as Promise<ICard[]>,
+      getAPI(`boards/${boardId}/cardOrder`, {}, this.AuthStore.token) as Promise<IList[]>,
     ]);
     runInAction(() => {
       this.cards = cards;
