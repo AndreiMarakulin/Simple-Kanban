@@ -16,6 +16,8 @@ class UserController {
       res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
+        sameSite: "Lax",
+        secure: true,
       });
       return res.json(userData);
     } catch (err) {
@@ -30,6 +32,8 @@ class UserController {
       res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
+        sameSite: "Lax",
+        secure: true,
       });
       return res.json(userData);
     } catch (err) {
@@ -44,8 +48,12 @@ class UserController {
         throw ApiError.badRequest("User does not login");
       }
       await tokenModel.removeToken(refreshToken);
-      res.clearCookie("refreshToken");
-      return res.json({}).status(200).send();
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        sameSite: "Lax",
+        secure: true,
+      });
+      return res.json({}).status(200);
     } catch (err) {
       next(err);
     }
@@ -55,12 +63,14 @@ class UserController {
     try {
       const { refreshToken } = req.cookies;
       if (!refreshToken) {
-        return res.json({}).status(200).send();
+        return res.json({}).status(200);
       }
       const userData = await userModel.refresh(refreshToken);
       res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
+        sameSite: "Lax",
+        secure: true,
       });
       return res.json(userData);
     } catch (err) {

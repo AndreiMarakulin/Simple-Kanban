@@ -1,5 +1,5 @@
 import { computed, flow, makeAutoObservable } from "mobx";
-import { getAPI, postAPI } from "../utils/api";
+import Api from "../utils/ApiHttp";
 
 interface IUser {
   id: number;
@@ -17,6 +17,7 @@ export interface IUserData {
 
 export class AuthStore {
   token: string | undefined = undefined;
+  userLogin: string | undefined = undefined;
 
   constructor() {
     makeAutoObservable(this, {
@@ -30,55 +31,69 @@ export class AuthStore {
   get isAuth(): boolean {
     return !!this.token;
   }
+  
+  changeToken(token: string) {
+    this.token = token;
+  }
 
   *login(
     login: string,
     password: string
-  ): Generator<Promise<IUserData>, boolean, IUserData> {
+  ): Generator<Promise<Object | void>, boolean, IUserData> {
     try {
-      const response = yield postAPI("auth/login", { login, password });
+      const response = yield new Api().post("/api/auth/login", {
+        login,
+        password,
+      });
       if (response.accessToken) {
         this.token = response.accessToken;
+        this.userLogin = response.user.login;
       } else {
         alert(response.message);
       }
     } catch (err) {
       console.log(err);
     }
-    return this.isAuth
+    return this.isAuth;
   }
 
   *registration(
     login: string,
     password: string
-  ): Generator<Promise<IUserData>, boolean, IUserData> {
+  ): Generator<Promise<Object | void>, boolean, IUserData> {
     try {
-      const response = yield postAPI("auth/registration", { login, password });
+      const response = yield new Api().post("/api/auth/registration", {
+        login,
+        password,
+      });
       if (response.accessToken) {
         this.token = response.accessToken;
+        this.userLogin = response.user.login;
       } else {
         alert(response.message);
       }
     } catch (err) {
       console.log(err);
     }
-    return this.isAuth
+    return this.isAuth;
   }
 
-  *logout(): Generator<Promise<void>, void, void> {
+  *logout(): Generator<Promise<Object | void>, void, void> {
     try {
-      yield getAPI("auth/logout", {}, this.token);
+      yield new Api().get("/api/auth/logout");
       this.token = undefined;
+      this.userLogin = undefined;
     } catch (err) {
       console.log(err);
     }
   }
 
-  *refresh(): Generator<Promise<IUserData>, void, IUserData> {
+  *refresh(): Generator<Promise<Object | void>, void, IUserData> {
     try {
-      const response = yield getAPI("auth/refresh");
-      if (response.accessToken) {
+      const response = yield new Api().get("/api/auth/refresh");
+      if (response?.accessToken) {
         this.token = response.accessToken;
+        this.userLogin = response.user.login;
       }
     } catch (err) {
       console.log(err);

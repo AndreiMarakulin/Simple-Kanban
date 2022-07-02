@@ -40,7 +40,7 @@ class CardModel {
         author_id: authorId,
         list_id: listId,
         category_id: categoryId,
-        deadline,
+        deadline: deadline ? new Date(deadline).toUTCString() : null,
       })
       .into({ c: "card" })
       .returning(["id", "created_at"]);

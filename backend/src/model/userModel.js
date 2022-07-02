@@ -66,13 +66,10 @@ class UserModel {
   }
 
   async refresh(refreshToken) {
-    if (!refreshToken) {
-      throw ApiError.unauthorized();
-    }
     const tokenData = await tokenModel.validateRefreshToken(refreshToken);
     const tokenFromDb = await tokenModel.findToken(refreshToken);
     if (!tokenData || !tokenFromDb) {
-      throw ApiError.unauthorized();
+      throw ApiError.badRequest();
     }
     const userData = await this.getUserById(tokenData.id, {
       id: "id",

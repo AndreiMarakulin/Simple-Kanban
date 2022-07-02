@@ -13,6 +13,9 @@ const MyNavbar: FC = () => {
       <Container>
         <Navbar.Brand>Knaban Board</Navbar.Brand>
         <Navbar.Collapse className="justify-content-end">
+          <Container >
+            {AuthStore.isAuth ? ("@" + AuthStore.userLogin) : null}
+          </Container>
           <Nav.Link>
             {AuthStore.isAuth ? (
               <Button

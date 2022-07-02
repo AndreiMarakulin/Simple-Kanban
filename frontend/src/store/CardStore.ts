@@ -1,6 +1,6 @@
 import { DraggableLocation } from "@react-forked/dnd";
 import { flow, makeAutoObservable, runInAction } from "mobx";
-import { getAPI, postAPI, putAPI } from "../utils/api";
+import Api from "../utils/ApiHttp";
 import { AuthStore } from "./AuthStore";
 
 export interface ICard {
@@ -11,7 +11,7 @@ export interface ICard {
   listId: number;
   boardId: number;
   categoryTitle: string | undefined;
-  deadline: number | undefined;
+  deadline: string | undefined;
   createdAt: string;
   updatedAt: string | undefined;
 }
@@ -47,8 +47,12 @@ export class CardStore {
   async getCardsAndOrder(boardId: number) {
     if (!boardId) return;
     const [cards, lists] = await Promise.all([
-      getAPI("cards", { boardId: boardId.toString() }, this.AuthStore.token) as Promise<ICard[]>,
-      getAPI(`boards/${boardId}/cardOrder`, {}, this.AuthStore.token) as Promise<IList[]>,
+      new Api(this.AuthStore).get("/api/cards", {
+        boardId: boardId.toString(),
+      }) as Promise<ICard[]>,
+      new Api(this.AuthStore).get(
+        `/api/boards/${boardId}/cardOrder`
+      ) as Promise<IList[]>,
     ]);
     runInAction(() => {
       this.cards = cards;
@@ -77,7 +81,7 @@ export class CardStore {
     sourceList.cardOrder.splice(source.index, 1);
     destinationList.cardOrder.splice(destination.index, 0, Number(draggableId));
     // TODO Переделать на WS
-    await putAPI(`boards/${boardId}/cardOrder`, {
+    await new Api(this.AuthStore).put(`/api/boards/${boardId}/cardOrder`, {
       sourceList: {
         id: sourceList.id,
         cardOrder: sourceList.cardOrder,
@@ -89,14 +93,17 @@ export class CardStore {
     });
   }
 
-  *createCard(newCard: INewCard): Generator<Promise<ICard>, void, ICard> {
-    const result = yield postAPI("cards", newCard);
+  *createCard(
+    newCard: INewCard
+  ): Generator<Promise<Object | void>, void, ICard> {
+    const result = yield new Api(this.AuthStore).post("/api/cards", newCard);
     if (result) {
       this.cards.push({
         ...result,
         listId: newCard.listId,
         boardId: newCard.boardId,
         authorLogin: "admin",
+        deadline: newCard.deadline ? new Date(newCard.deadline).toISOString() : undefined,
       });
       this.lists
         .find((list) => list.id === newCard.listId)!

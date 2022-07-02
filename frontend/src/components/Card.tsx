@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import React, { FC } from "react";
 import { Card } from "react-bootstrap";
 import { ICard } from "../store/CardStore";
+import { DateTime } from "luxon";
 
 interface TaskCardProps {
   card: ICard;
@@ -24,12 +25,17 @@ const TaskCard: FC<TaskCardProps> = ({ card, index }) => {
             <Card.Subtitle className="mb-2 text-muted">
               Author: @{card.authorLogin}
             </Card.Subtitle>
-            <Card.Subtitle className="mb-2">
-              Category: {card.categoryTitle}
-            </Card.Subtitle>
-            <Card.Subtitle className="mb-1">
-              Deadline: {card.deadline}
-            </Card.Subtitle>
+            {card.categoryTitle ? (
+              <Card.Subtitle className="mb-2">
+                Category: {card.categoryTitle}
+              </Card.Subtitle>
+            ) : null}
+            {card.deadline ? (
+              <Card.Subtitle className="mb-1">
+                Deadline:{" "}
+                {DateTime.fromISO(card.deadline).toFormat("dd.MM.yyyy")}
+              </Card.Subtitle>
+            ) : null}
           </Card.Body>
         </Card>
       )}

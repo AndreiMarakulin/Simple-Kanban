@@ -33,7 +33,7 @@ const App: FC = () => {
           </Row>
         </Container>
       ) : (
-        <div>Не авторизован</div>
+        <h3 className="center" >Не авторизован</h3>
       )}
     </div>
   );

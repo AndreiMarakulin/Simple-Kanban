@@ -124,7 +124,7 @@ class BoardController {
       }
 
       await boardModel.deleteBoard(boardId);
-      res.status(200).send();
+      res.status(200).send({"deleted": true});
     } catch (err) {
       next(err);
     }

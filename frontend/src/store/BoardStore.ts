@@ -1,5 +1,5 @@
 import { flow, makeAutoObservable } from "mobx";
-import { deleteAPI, getAPI, postAPI } from "../utils/api";
+import Api from "../utils/ApiHttp";
 import { AuthStore } from "./AuthStore";
 
 export interface IBoard {
@@ -31,20 +31,25 @@ export class BoardStore {
     this.AuthStore = AuthStore;
   }
 
-  *getBoards(): Generator<Promise<IBoard[]>, void, IBoard[]> {
-    const result = yield getAPI("boards", {}, this.AuthStore.token);
+  *getBoards(): Generator<Promise<Object | void>, void, IBoard[]> {
+    const result = yield new Api(this.AuthStore).get("/api/boards");
     this.boards = result;
   }
 
-  *createBoard(newBoard: INewBoard): Generator<Promise<IBoard>, void, IBoard> {
-    const result = yield postAPI("boards", newBoard);
+  *createBoard(
+    newBoard: INewBoard
+  ): Generator<Promise<Object | void>, void, IBoard> {
+    const result = yield new Api(this.AuthStore).post("/api/boards", newBoard);
     if (result) {
       this.boards.push(result);
     }
   }
 
-  *deleteBoard(boardId: number): Generator<Promise<boolean>, void, boolean> {
-    if (yield deleteAPI(`boards/${boardId}`)) {
+  *deleteBoard(
+    boardId: number
+  ): Generator<Promise<Object | void>, void, boolean> {
+    const result = yield new Api(this.AuthStore).delete(`/api/boards/${boardId}`);
+    if (result) {
       this.boards = this.boards.filter((board) => board.id !== boardId);
     }
   }

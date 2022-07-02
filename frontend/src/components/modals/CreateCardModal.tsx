@@ -86,11 +86,13 @@ const CreateCard: FC<ModalProps> = ({ currentList, isShown, onHide }) => {
             />
           </FloatingLabel>
           <FloatingLabel
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              console.log(e.target.value);
               setNewCard({
                 ...newCard,
                 listId: e.target.value !== "" ? Number(e.target.value) : NaN,
               })
+            }
             }
             className="mb-3"
             label="Статус задачи"
@@ -162,14 +164,12 @@ const CreateCard: FC<ModalProps> = ({ currentList, isShown, onHide }) => {
         <Button
           variant="primary"
           onClick={() => {
-            console.log({
-              ...newCard,
-              boardId: BoardStore.currentBoard ? BoardStore.currentBoard.id : 0,
-            });
             // FIXME проверка на текущей доски на правильность данных
             CardStore.createCard({
               ...newCard,
               boardId: BoardStore.currentBoard ? BoardStore.currentBoard.id : 0,
+              deadline: enterDeadline ? newCard.deadline : NaN,
+              listId: newCard.listId ? newCard.listId : currentList.id,
             });
             closeModal();
           }}
