@@ -16,13 +16,13 @@ const LoginModal: FC<ModalProps> = ({ isShown, onHide }) => {
   const closeModal = () => {
     setLogin("");
     setPassword("");
+    setloginForm(true);
     onHide();
   };
 
   const submit = async () => {
     try {
       if (loginForm) {
-        // TODO закрывать форму при логине
         const loginSuccess = await AuthStore.login(login, password);
         if (loginSuccess) closeModal();
       } else {
