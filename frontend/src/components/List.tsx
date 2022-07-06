@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { Store, useStore } from "../store";
 import { IList } from "../store/CardStore";
 import TaskCard from "./Card";
-import { DroppableProvided, DroppableStateSnapshot } from "@react-forked/dnd";
+import { DroppableProvided, DroppableStateSnapshot } from "react-beautiful-dnd";
 
 interface ListProps {
   provided: DroppableProvided;

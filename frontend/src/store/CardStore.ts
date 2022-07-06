@@ -1,7 +1,8 @@
-import { DraggableLocation } from "@react-forked/dnd";
+import { DraggableLocation } from "react-beautiful-dnd";
 import { flow, makeAutoObservable, runInAction } from "mobx";
 import Api from "../utils/ApiHttp";
 import { AuthStore } from "./AuthStore";
+import { Socket } from "socket.io-client";
 
 export interface ICard {
   id: number;
@@ -34,14 +35,16 @@ export interface IList {
 
 export class CardStore {
   AuthStore: AuthStore;
+  socket: Socket;
   cards: ICard[] = [];
   lists: IList[] = [];
 
-  constructor(AuthStore: AuthStore) {
+  constructor(AuthStore: AuthStore, socket: Socket) {
     makeAutoObservable(this, {
       createCard: flow,
     });
     this.AuthStore = AuthStore;
+    this.socket = socket;
   }
 
   async getCardsAndOrder(boardId: number) {
@@ -91,6 +94,16 @@ export class CardStore {
         cardOrder: destinationList.cardOrder,
       },
     });
+    this.socket.emit("message", {
+      sourceList: {
+        id: sourceList.id,
+        cardOrder: sourceList.cardOrder,
+      },
+      destinationList: {
+        id: destinationList.id,
+        cardOrder: destinationList.cardOrder,
+      },
+    });
   }
 
   *createCard(
@@ -103,7 +116,9 @@ export class CardStore {
         listId: newCard.listId,
         boardId: newCard.boardId,
         authorLogin: "admin",
-        deadline: newCard.deadline ? new Date(newCard.deadline).toISOString() : undefined,
+        deadline: newCard.deadline
+          ? new Date(newCard.deadline).toISOString()
+          : undefined,
       });
       this.lists
         .find((list) => list.id === newCard.listId)!

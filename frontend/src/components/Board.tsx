@@ -3,7 +3,7 @@ import { FC, useState } from "react";
 import { Button, Container } from "react-bootstrap";
 import { useStore } from "../store";
 import CreateCardModal from "./modals/CreateCardModal";
-import { DragDropContext, Droppable, DropResult } from "@react-forked/dnd";
+import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
 import List from "./List";
 import { IList } from "../store/CardStore";
 
@@ -16,7 +16,7 @@ const Board: FC = () => {
     setCurrentList(list);
     setCreateCardVisible(flag);
   }
-
+  
   const onDragEnd = (result: DropResult): void => {
     const { destination, source, draggableId } = result;
 

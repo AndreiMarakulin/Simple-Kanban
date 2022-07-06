@@ -1,4 +1,4 @@
-import { Draggable } from "@react-forked/dnd";
+import { Draggable } from "react-beautiful-dnd";
 import { observer } from "mobx-react-lite";
 import React, { FC } from "react";
 import { Card } from "react-bootstrap";
