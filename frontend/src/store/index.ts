@@ -6,17 +6,19 @@ import { BoardStore } from "./BoardStore";
 import { CardStore } from "./CardStore";
 
 interface IChangeCardOrder {
+  boardId: number;
   sourceList: { id: number; cardOrder: number[] };
   destinationList: { id: number; cardOrder: number[] };
 }
 
-interface ServerToClientEvents {
+export interface ServerToClientEvents {
   message: () => void;
   changeCardOrder: (item: IChangeCardOrder) => void;
 }
 
-interface ClientToServerEvents {
+export interface ClientToServerEvents {
   message: () => void;
+  changeCardOrder: (item: IChangeCardOrder) => void;
 }
 
 class Store {
@@ -29,14 +31,21 @@ class Store {
     this.AuthStore = new AuthStore();
     this.socket = io("", {
       transports: ["websocket"],
+      // query: {
+      //   token: ''
+      // }
     });
+
+    // this.socket.io.on('reconnect_attempt', () => {
+
+    // })
 
     this.BoardStore = new BoardStore(this.AuthStore);
     this.CardStore = new CardStore(this.AuthStore, this.socket);
 
-    this.socket.on("connect", () => {
-      console.log(this.socket.id);
-    });
+    // this.socket.on("connect", () => {
+    //   console.log(this.socket.id);
+    // });
   }
 }
 

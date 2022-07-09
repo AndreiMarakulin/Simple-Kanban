@@ -61,6 +61,4 @@ const Board: FC = () => {
   );
 };
 
-
-// TODO https://egghead.io/lessons/react-persist-list-reordering-with-react-beautiful-dnd-using-the-ondragend-callback
 export default observer(Board);

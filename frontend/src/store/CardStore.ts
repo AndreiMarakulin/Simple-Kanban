@@ -3,6 +3,7 @@ import { flow, makeAutoObservable, runInAction } from "mobx";
 import Api from "../utils/ApiHttp";
 import { AuthStore } from "./AuthStore";
 import { Socket } from "socket.io-client";
+import { ClientToServerEvents, ServerToClientEvents } from ".";
 
 export interface ICard {
   id: number;
@@ -35,7 +36,8 @@ export interface IList {
 
 export class CardStore {
   AuthStore: AuthStore;
-  socket: Socket;
+  socket: Socket<ServerToClientEvents, ClientToServerEvents>;
+  currentBoardId: number | undefined;
   cards: ICard[] = [];
   lists: IList[] = [];
 
@@ -45,10 +47,21 @@ export class CardStore {
     });
     this.AuthStore = AuthStore;
     this.socket = socket;
+
+    this.socket.on("changeCardOrder", ({boardId, sourceList, destinationList}) => {
+      if (boardId === this.currentBoardId) {
+        console.log(boardId, sourceList, destinationList)
+        runInAction(() => {
+          this.lists.find((list) => list.id === sourceList.id)!.cardOrder = sourceList.cardOrder;
+          this.lists.find((list) => list.id === destinationList.id)!.cardOrder = destinationList.cardOrder;
+        });
+      }
+    })
   }
 
   async getCardsAndOrder(boardId: number) {
     if (!boardId) return;
+    this.currentBoardId = boardId;
     const [cards, lists] = await Promise.all([
       new Api(this.AuthStore).get("/api/cards", {
         boardId: boardId.toString(),
@@ -84,17 +97,18 @@ export class CardStore {
     sourceList.cardOrder.splice(source.index, 1);
     destinationList.cardOrder.splice(destination.index, 0, Number(draggableId));
     // TODO Переделать на WS
-    await new Api(this.AuthStore).put(`/api/boards/${boardId}/cardOrder`, {
-      sourceList: {
-        id: sourceList.id,
-        cardOrder: sourceList.cardOrder,
-      },
-      destinationList: {
-        id: destinationList.id,
-        cardOrder: destinationList.cardOrder,
-      },
-    });
-    this.socket.emit("message", {
+    // await new Api(this.AuthStore).put(`/api/boards/${boardId}/cardOrder`, {
+    //   sourceList: {
+    //     id: sourceList.id,
+    //     cardOrder: sourceList.cardOrder,
+    //   },
+    //   destinationList: {
+    //     id: destinationList.id,
+    //     cardOrder: destinationList.cardOrder,
+    //   },
+    // });
+    this.socket.emit("changeCardOrder", {
+      boardId: boardId,
       sourceList: {
         id: sourceList.id,
         cardOrder: sourceList.cardOrder,

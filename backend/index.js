@@ -8,12 +8,10 @@ const io = require("socket.io")(server, {
 
 const wsRouter = require("./src/sockets");
 
-const onConnecton = async(socket) => {
-    console.log("a user connected");
-    await wsRouter(io, socket);
-}
-
-io.on("connection", onConnecton);
+io.on("connection", async(socket) => {
+  // console.log("a user connected");
+  await wsRouter(io, socket);
+});
 
 const errorHadler = require("./src/middleware/ErrorHandlingMiddleware");
 const auth = require("./src/middleware/authMiddleware");
