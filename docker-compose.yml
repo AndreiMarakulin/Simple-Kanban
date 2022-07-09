@@ -1,0 +1,47 @@
+version: '3'
+services:
+  pgsql:
+    container_name: pgsql
+    image: postgres:latest
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./data/pgsql:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: kanban_board
+      POSTGRES_PASSWORD: 2Ht!rV7txsiWZ&6r2Gm^
+      POSTGRES_DB: kanban_board
+  api:
+    container_name: api
+    image: andreimarakulin/kanban-backend:latest
+    volumes:
+      - ./services/api/src:/usr/src/app/src
+      - ./services/api/index.js:/usr/src/app/index.js
+    environment:
+      JWT_ACCESS_SECRET: "sSn5yG9uq4eYBWScKp5PiaUbCSouowRoVLadiZ6Kmv7d4CBRrGdZkijB6EKRPSta"
+      JWT_REFRESH_SECRET: "7sJsr2XJmvJ9Ku4U2d6jjdWySKDqhSdGQkJhWfRsfS8E73XeardgY6ocBgF4FMqf"
+      DB_NAME: "kanban_board"
+      DB_USER: "kanban_board"
+      DB_PASSWORD: "2Ht!rV7txsiWZ&6r2Gm^"
+      DB_HOST: "127.0.0.1"
+      DB_PORT: 5432
+      # DB_URL: postgresql://kanban_board:2Ht!rV7txsiWZ&6r2Gm^@pgsql:5432/kanban_board
+      NODE_ENV: production
+    ports:
+      - '12321:12321'
+      # - '9229:9229'
+    command: 'npm run start'
+    depends_on:
+      - pgsql
+  proxy:
+    container_name: proxy
+    image: andreimarakulin/kanban-proxy:latest
+    volumes:
+      - ./services/nginx:/etc/nginx
+      - /etc/letsencrypt:/etc/letsencrypt
+    ports:
+      - '80:80'
+      - '443:443'
+    command: 'nginx -g "daemon off;"'
+    depends_on:
+      - api

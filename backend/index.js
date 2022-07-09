@@ -25,5 +25,5 @@ app.use("/api", api);
 
 app.use(errorHadler);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 12321;
 server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
