@@ -13,14 +13,15 @@ class tokenModel {
   }
 
   async saveTokens(userId, refreshToken) {
-    const tokenData = await this.findToken(refreshToken);
+    const tokenData = await this.findTokenByUserId(userId);
     if (tokenData) {
       await db
         .update({ token: refreshToken })
         .into("token")
         .where({ user_id: userId });
+    } else {
+      await db.insert({ user_id: userId, token: refreshToken }).into("token");
     }
-    await db.insert({ user_id: userId, token: refreshToken }).into("token");
   }
 
   async validateRefreshToken(refreshToken) {
@@ -37,6 +38,14 @@ class tokenModel {
       .first({ user_id: "user_id", token: "token" })
       .from("token")
       .where({ token: refreshToken });
+    return token;
+  }
+
+  async findTokenByUserId(userId) {
+    const token = await db
+      .first({ user_id: "user_id", token: "token" })
+      .from("token")
+      .where({ user_id: userId });
     return token;
   }
 
