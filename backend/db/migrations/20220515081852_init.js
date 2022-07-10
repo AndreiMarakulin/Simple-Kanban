@@ -75,7 +75,6 @@ exports.up = async (knex) => {
     table.integer("card_id").references("card.id");
   });
 
-  // TODO как правильно хранить порядок карточек в листе?
   await knex.schema.createTable("card_order", (table) => {
     table.increments("id").primary;
     table.integer("board_id").references("board.id").index();

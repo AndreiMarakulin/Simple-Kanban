@@ -112,7 +112,6 @@ const CreateCard: FC<ModalProps> = ({ currentList, isShown, onHide }) => {
               value={newCard.categoryId || ""}
             />
           </FloatingLabel> */}
-          {/* TODO форматирование даты */}
           <InputGroup className="mb-3">
             <InputGroup.Text >Срок исполнения</InputGroup.Text>
             <InputGroup.Checkbox
@@ -157,7 +156,6 @@ const CreateCard: FC<ModalProps> = ({ currentList, isShown, onHide }) => {
         <Button
           variant="primary"
           onClick={() => {
-            // FIXME проверка на текущей доски на правильность данных
             CardStore.createCard({
               ...newCard,
               boardId: BoardStore.currentBoard ? BoardStore.currentBoard.id : 0,

@@ -24,9 +24,6 @@ class CardCotroller {
           ApiError.badRequest(`Author with id ${authorId} does not exist`)
         );
       }
-      // TODO check if list with listId exists
-      // TODO check if board with boardId exists
-      // TODO check if category with categoryId exists
       const data = await cardModel.create(
         title,
         description,
@@ -53,7 +50,6 @@ class CardCotroller {
   async getAll(req, res, next) {
     const { listId, boardId } = req.query;
     try {
-      // TODO check if list with listId exists
       const data = await cardModel.get(listId, boardId);
       res.json(data);
     } catch (err) {
@@ -100,8 +96,6 @@ class CardCotroller {
           ApiError.badRequest(`Card with id ${cardId} does not exist`)
         )
       }
-      // TODO check if list with listId exists
-      // TODO check if category with categoryId exists
       const data = await cardModel.update(cardId, {
         title,
         description,
