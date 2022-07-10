@@ -1,41 +1,44 @@
 import { observer } from "mobx-react-lite";
-import React, { FC, useState } from "react";
-import { Navbar, Container, Nav, Button } from "react-bootstrap";
+import React, { FC } from "react";
+import { Navbar, Container, Button } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
 import { useStore } from "../store";
-import LoginModal from "./modals/LoginModal";
 
 const MyNavbar: FC = () => {
   const { AuthStore } = useStore();
-  const [loginVisible, setLoginVisible] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <Navbar bg="light" variant="light">
       <Container>
-        <Navbar.Brand>Knaban Board</Navbar.Brand>
-        <Navbar.Collapse className="justify-content-end">
-          <Container >
-            {AuthStore.isAuth ? ("@" + AuthStore.userLogin) : null}
-          </Container>
-          <Nav.Link>
-            {AuthStore.isAuth ? (
-              <Button
-                variant="outline-primary"
-                onClick={() => AuthStore.logout()}
-              >
-                Выйти
-              </Button>
-            ) : (
-              <Button
-                variant="outline-primary"
-                onClick={() => setLoginVisible(true)}
-              >
-                Войти
-              </Button>
-            )}
-          </Nav.Link>
-          <LoginModal 
-          isShown={loginVisible}
-          onHide={() => {setLoginVisible(false)}}/>
+        <Navbar.Brand as={Link} to="/">
+          Knaban Board
+        </Navbar.Brand>
+        <Navbar.Collapse className="navbar">
+          <h5>{AuthStore.isAuth ? "@" + AuthStore.user?.login : null}</h5>
+          {AuthStore.isAdmin ? (
+            <Button
+              variant="outline-primary"
+              onClick={() => navigate("/admin")}
+            >
+              Панель администратора
+            </Button>
+          ) : null}
+          {AuthStore.isAuth ? (
+            <Button
+              variant="outline-primary"
+              onClick={() => {
+                AuthStore.logout();
+                navigate("/auth");
+              }}
+            >
+              Выйти
+            </Button>
+          ) : (
+            <Button variant="outline-primary" onClick={() => navigate("/auth")}>
+              Войти
+            </Button>
+          )}
         </Navbar.Collapse>
       </Container>
     </Navbar>

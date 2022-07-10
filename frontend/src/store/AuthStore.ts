@@ -1,12 +1,6 @@
 import { computed, flow, makeAutoObservable } from "mobx";
 import Api from "../utils/ApiHttp";
-
-interface IUser {
-  id: number;
-  login: string;
-  name: string;
-  role: string;
-}
+import { IUser } from "./AdminStore";
 
 export interface IUserData {
   user: IUser;
@@ -17,7 +11,7 @@ export interface IUserData {
 
 export class AuthStore {
   token: string | undefined = undefined;
-  userLogin: string | undefined = undefined;
+  user: IUser | undefined;
 
   constructor() {
     makeAutoObservable(this, {
@@ -25,11 +19,16 @@ export class AuthStore {
       logout: flow,
       registration: flow,
       isAuth: computed,
+      isAdmin: computed,
     });
   }
 
   get isAuth(): boolean {
     return !!this.token;
+  }
+
+  get isAdmin(): boolean {
+    return this.user?.role === "ADMIN";
   }
   
   changeToken(token: string) {
@@ -47,7 +46,7 @@ export class AuthStore {
       });
       if (response.accessToken) {
         this.token = response.accessToken;
-        this.userLogin = response.user.login;
+        this.user = this.parseToken(this.token);
       } else {
         alert(response.message);
       }
@@ -68,7 +67,7 @@ export class AuthStore {
       });
       if (response.accessToken) {
         this.token = response.accessToken;
-        this.userLogin = response.user.login;
+        this.user = this.parseToken(this.token);
       } else {
         alert(response.message);
       }
@@ -82,21 +81,28 @@ export class AuthStore {
     try {
       yield new Api().get("/api/auth/logout");
       this.token = undefined;
-      this.userLogin = undefined;
+      this.user = undefined;
     } catch (err) {
       console.log(err);
     }
   }
 
-  *refresh(): Generator<Promise<Object | void>, void, IUserData> {
+  *refresh(): Generator<Promise<Object | void>, boolean, IUserData> {
     try {
       const response = yield new Api().get("/api/auth/refresh");
       if (response?.accessToken) {
         this.token = response.accessToken;
-        this.userLogin = response.user.login;
+        this.user = this.parseToken(this.token);
       }
     } catch (err) {
       console.log(err);
     }
+    return this.isAuth;
+  }
+
+  parseToken(token: string): IUser {
+    const [, payload, ] = token.split(".");
+    const userData = JSON.parse(atob(payload));
+    return userData;
   }
 }

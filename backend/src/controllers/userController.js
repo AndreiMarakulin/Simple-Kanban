@@ -125,17 +125,18 @@ class UserController {
    */
   update = async (req, res, next) => {
     const { userId } = req.params;
-    const { login, password, name, role } = req.body;
+    const { login, password, name, role, status } = req.body;
     try {
-      const userWithLogin = await userModel.getUserByLogin(login, { id: "id" });
-      if (userWithLogin) {
-        return next(ApiError.badRequest(`User ${login} already exists`));
+      const userWithId = await userModel.getUserById(userId, { id: "id" });
+      if (!userWithId) {
+        return next(ApiError.badRequest(`User with id ${userId} does not exist`));
       }
       const user = await userModel.updateUser(userId, {
         login,
         password,
         name,
         role,
+        status,
       });
       res.json(user);
     } catch (err) {

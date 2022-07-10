@@ -9,8 +9,7 @@ class UserModel {
     login: "login",
     name: "name",
     role: "role",
-    created_at: "created_at",
-    updated_at: "updated_at",
+    status: "status",
   };
 
   async registration(login, password, name = "", role = "USER") {
@@ -33,6 +32,7 @@ class UserModel {
         login: "login",
         name: "name",
         role: "role",
+        status: "status",
       });
     const tokens = tokenModel.generateTokens(userData);
     tokenModel.saveTokens(userData.id, tokens.refreshToken);
@@ -46,9 +46,13 @@ class UserModel {
       name: "name",
       password: "password",
       role: "role",
+      status: "status",
     });
     if (!user) {
       throw ApiError.badRequest(`User ${login} does not exist`);
+    }
+    if (user.status === "BLOCKED") {
+      throw ApiError.badRequest(`User ${login} is blocked`);
     }
     const isPasswordEquals = await bcrypt.compare(password, user.password);
     if (!isPasswordEquals) {
@@ -88,7 +92,7 @@ class UserModel {
    * @returns {import("knex").Knex.QueryBuilder<*. *>}
    */
   getAllUsers = (fields = this.#fileds) => {
-    return db.select(fields).from("user");
+    return db.select(fields).from("user").orderBy("id");
   };
 
   /**
@@ -117,7 +121,7 @@ class UserModel {
    * @param {Object} updatedParams
    * @returns {Promise<Object>}
    */
-  updateUser = async (userId, { login, password, name, role }) => {
+  updateUser = async (userId, { login, password, name, role, status }) => {
     const [user] = await db
       .update({
         updated_at: new Date().toISOString(),
@@ -125,6 +129,7 @@ class UserModel {
         ...(password ? { password: await bcrypt.hash(password, 8) } : {}),
         ...(name ? { name } : {}),
         ...(role ? { role } : {}),
+        ...(status ? { status } : {}),
       })
       .table("user")
       .where({ id: userId })

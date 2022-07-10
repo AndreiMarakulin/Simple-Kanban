@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import React, { FC, useState } from "react";
 import { Button, Form, Modal, FloatingLabel } from "react-bootstrap";
-import { Store, useStore } from "../../store";
+import { useStore } from "../../store";
 import { INewBoard } from "../../store/BoardStore";
 
 interface ModalProps {
@@ -9,16 +9,16 @@ interface ModalProps {
   onHide: () => void;
 }
 
-const defaultBoard: INewBoard = {
-  title: "",
-  description: undefined,
-  owner_id: NaN,
-};
-
 const CreateBoard: FC<ModalProps> = ({ isShown, onHide }) => {
-  const store: Store = useStore();
-  const [newBoard, setNewBoard] = useState<INewBoard>(defaultBoard);
+  const { BoardStore, AuthStore } = useStore();
+  
+  const defaultBoard: INewBoard = {
+    title: "",
+    description: undefined,
+    owner_id: AuthStore.user ? AuthStore.user.id : 0,
+  };
 
+  const [newBoard, setNewBoard] = useState<INewBoard>(defaultBoard);
   const closeModal = () => {
     setNewBoard(defaultBoard);
     onHide();
@@ -58,19 +58,11 @@ const CreateBoard: FC<ModalProps> = ({ isShown, onHide }) => {
               value={newBoard.description || ""}
             />
           </FloatingLabel>
-          {/* TODO убрать после перехода на систему авторизации */}
-          <FloatingLabel className="mb-3" label="AuthorId">
+          <FloatingLabel className="mb-3" label="Создатель доски">
             <Form.Control
+              disabled
               type="text"
-              placeholder="Enter AuthorId"
-              onChange={(e) =>
-                setNewBoard({
-                  ...newBoard,
-                  owner_id:
-                    e.target.value !== "" ? Number(e.target.value) : NaN,
-                })
-              }
-              value={isNaN(newBoard.owner_id) ? "" : newBoard.owner_id}
+              value={"@" + AuthStore.user?.login}
             />
           </FloatingLabel>
         </Form>
@@ -83,7 +75,7 @@ const CreateBoard: FC<ModalProps> = ({ isShown, onHide }) => {
         <Button
           variant="primary"
           onClick={() => {
-            store.BoardStore.createBoard(newBoard);
+            BoardStore.createBoard(newBoard);
             closeModal();
           }}
         >

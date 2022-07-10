@@ -1,5 +1,6 @@
 import { createContext, useContext } from "react";
 import { io, Socket } from "socket.io-client";
+import { AdminStore } from "./AdminStore";
 
 import { AuthStore } from "./AuthStore";
 import { BoardStore } from "./BoardStore";
@@ -25,6 +26,7 @@ class Store {
   BoardStore: BoardStore;
   CardStore: CardStore;
   AuthStore: AuthStore;
+  AdminStore: AdminStore;
   socket: Socket<ServerToClientEvents, ClientToServerEvents>;
 
   constructor() {
@@ -41,6 +43,7 @@ class Store {
     // })
 
     this.BoardStore = new BoardStore(this.AuthStore);
+    this.AdminStore = new AdminStore(this.AuthStore);
     this.CardStore = new CardStore(this.AuthStore, this.socket);
 
     // this.socket.on("connect", () => {

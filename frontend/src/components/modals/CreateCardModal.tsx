@@ -28,7 +28,7 @@ const defaultCard: INewCard = {
 };
 
 const CreateCard: FC<ModalProps> = ({ currentList, isShown, onHide }) => {
-  const { BoardStore, CardStore } = useStore();
+  const { BoardStore, CardStore, AuthStore } = useStore();
   const [newCard, setNewCard] = useState<INewCard>(defaultCard);
   const [enterDeadline, setEnterDeadline] = useState(false);
 
@@ -71,20 +71,6 @@ const CreateCard: FC<ModalProps> = ({ currentList, isShown, onHide }) => {
               value={newCard.description || ""}
             />
           </FloatingLabel>
-          <FloatingLabel className="mb-3" label="AuthorId">
-            <Form.Control
-              type="text"
-              placeholder="Enter AuthorId"
-              onChange={(e) =>
-                setNewCard({
-                  ...newCard,
-                  authorId:
-                    e.target.value !== "" ? Number(e.target.value) : NaN,
-                })
-              }
-              value={isNaN(newCard.authorId) ? "" : newCard.authorId}
-            />
-          </FloatingLabel>
           <FloatingLabel
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               console.log(e.target.value);
@@ -97,7 +83,7 @@ const CreateCard: FC<ModalProps> = ({ currentList, isShown, onHide }) => {
             className="mb-3"
             label="Статус задачи"
           >
-            <Form.Select aria-label="Floating label select example">
+            <Form.Select>
               <option key={currentList.id} value={currentList.id}>
                 {currentList.title}
               </option>
@@ -111,7 +97,7 @@ const CreateCard: FC<ModalProps> = ({ currentList, isShown, onHide }) => {
             </Form.Select>
           </FloatingLabel>
 
-          <FloatingLabel className="mb-3" label="Категория">
+          {/* <FloatingLabel className="mb-3" label="Категория">
             <Form.Control
               disabled
               type="text"
@@ -125,7 +111,7 @@ const CreateCard: FC<ModalProps> = ({ currentList, isShown, onHide }) => {
               }}
               value={newCard.categoryId || ""}
             />
-          </FloatingLabel>
+          </FloatingLabel> */}
           {/* TODO форматирование даты */}
           <InputGroup className="mb-3">
             <InputGroup.Text >Срок исполнения</InputGroup.Text>
@@ -154,6 +140,13 @@ const CreateCard: FC<ModalProps> = ({ currentList, isShown, onHide }) => {
               )}
             />
           </InputGroup>
+          <FloatingLabel className="mb-3" label="Автор задачи">
+            <Form.Control
+              disabled
+              type="text"
+              value={"@" + AuthStore.user?.login}
+            />
+          </FloatingLabel>
         </Form>
       </Modal.Body>
 
@@ -170,6 +163,7 @@ const CreateCard: FC<ModalProps> = ({ currentList, isShown, onHide }) => {
               boardId: BoardStore.currentBoard ? BoardStore.currentBoard.id : 0,
               deadline: enterDeadline ? newCard.deadline : NaN,
               listId: newCard.listId ? newCard.listId : currentList.id,
+              authorId: AuthStore.user ? AuthStore.user.id : 0,
             });
             closeModal();
           }}
