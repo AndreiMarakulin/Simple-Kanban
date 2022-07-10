@@ -50,7 +50,6 @@ export class CardStore {
 
     this.socket.on("changeCardOrder", ({boardId, sourceList, destinationList}) => {
       if (boardId === this.currentBoardId) {
-        console.log(boardId, sourceList, destinationList)
         runInAction(() => {
           this.lists.find((list) => list.id === sourceList.id)!.cardOrder = sourceList.cardOrder;
           this.lists.find((list) => list.id === destinationList.id)!.cardOrder = destinationList.cardOrder;
@@ -96,17 +95,6 @@ export class CardStore {
     }
     sourceList.cardOrder.splice(source.index, 1);
     destinationList.cardOrder.splice(destination.index, 0, Number(draggableId));
-    // TODO Переделать на WS
-    // await new Api(this.AuthStore).put(`/api/boards/${boardId}/cardOrder`, {
-    //   sourceList: {
-    //     id: sourceList.id,
-    //     cardOrder: sourceList.cardOrder,
-    //   },
-    //   destinationList: {
-    //     id: destinationList.id,
-    //     cardOrder: destinationList.cardOrder,
-    //   },
-    // });
     this.socket.emit("changeCardOrder", {
       boardId: boardId,
       sourceList: {
