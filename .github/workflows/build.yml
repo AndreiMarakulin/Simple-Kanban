@@ -13,13 +13,13 @@ jobs:
           echo '${{ secrets.DOCKERHUB_PASSWORD }}' | docker login -u '${{ secrets.DOCKERHUB_USERNAME }}' --password-stdin
       - name: Build backend
         run: |
-          docker build -f ./backend/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/kanban-backend:latest ./services/api
+          docker build -f ./backend/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/kanban-backend:latest ./backend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/kanban-backend:latest
       - name: Build frontend
         run: |
-          docker build -f ./frontend/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/kanban-frontend:latest ./services/client
+          docker build -f ./frontend/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/kanban-frontend:latest ./frontend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/kanban-frontend:latest
       - name: Build proxy
         run: |
-          docker build -f ./proxy/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/kanban-proxy:latest ./services
+          docker build -f ./proxy/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/kanban-proxy:latest ./proxy
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/kanban-proxy:latest
