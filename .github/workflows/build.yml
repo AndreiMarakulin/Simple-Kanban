@@ -1,0 +1,26 @@
+name: Build
+on: workflow_dispatch
+
+  workflow_dispatch:
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Docker login
+        run: |
+          echo '${{ secrets.DOCKERHUB_PASSWORD }}' | docker login -u '${{ secrets.DOCKERHUB_USERNAME }}' --password-stdin
+      - name: Build backend
+        run: |
+          docker build -f ./backend/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/kanban-backend:latest ./services/api
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/kanban-backend:latest
+      - name: Build frontend
+        run: |
+          docker build -f ./frontend/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/kanban-frontend:latest ./services/client
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/kanban-frontend:latest
+      - name: Build proxy
+        run: |
+          docker build -f ./proxy/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/kanban-proxy:latest ./services
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/kanban-proxy:latest
