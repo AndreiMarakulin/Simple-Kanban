@@ -20,16 +20,12 @@ services:
     environment:
       JWT_ACCESS_SECRET: "sSn5yG9uq4eYBWScKp5PiaUbCSouowRoVLadiZ6Kmv7d4CBRrGdZkijB6EKRPSta"
       JWT_REFRESH_SECRET: "7sJsr2XJmvJ9Ku4U2d6jjdWySKDqhSdGQkJhWfRsfS8E73XeardgY6ocBgF4FMqf"
-      DB_NAME: "kanban_board"
-      DB_USER: "kanban_board"
-      DB_PASSWORD: "2Ht!rV7txsiWZ&6r2Gm^"
-      DB_HOST: "127.0.0.1"
-      DB_PORT: 5432
+      DB_URL: "postgresql://kanban_board:2Ht!rV7txsiWZ&6r2Gm^@pgsql:5432/kanban_board"
       NODE_ENV: production
     ports:
       - '12321:12321'
-      # - '9229:9229'
     command: 'npm run start'
+    # command: sh -c "npx knex migrate:latest --env development && npx knex seed:run --env development && npm run start"
     depends_on:
       - pgsql
   proxy:
