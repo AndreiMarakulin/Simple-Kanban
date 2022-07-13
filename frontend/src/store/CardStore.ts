@@ -117,7 +117,7 @@ export class CardStore {
         ...result,
         listId: newCard.listId,
         boardId: newCard.boardId,
-        authorLogin: "admin",
+        authorLogin: this.AuthStore.user ? this.AuthStore.user.login : "",
         deadline: newCard.deadline
           ? new Date(newCard.deadline).toISOString()
           : undefined,
