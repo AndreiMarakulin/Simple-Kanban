@@ -4,7 +4,7 @@ services:
     container_name: pgsql
     image: postgres:latest
     ports:
-      - '5432:5432'
+      - '127.0.0.1:5432:5432'
     volumes:
       - ./data/pgsql:/var/lib/postgresql/data
     environment:
@@ -27,7 +27,7 @@ services:
       DB_PORT: 5432
       NODE_ENV: production
     ports:
-      - '12321:12321'
+      - '127.0.0.1:12321:12321'
     command: 'npm run start'
     # command: sh -c "npx knex migrate:latest --env development && npx knex seed:run --env development && npm run start"
     depends_on:
