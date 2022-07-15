@@ -40,32 +40,32 @@ exports.seed = async function (knex) {
       status: "ACTIVE",
     },
     {
-      login: "user1",
-      password: await bcrypt.hash("user1", 5),
-      name: "user1",
+      login: "user",
+      password: await bcrypt.hash("user", 5),
+      name: "user",
       role: "USER",
       status: "ACTIVE",
     },
     {
-      login: "user2",
-      password: await bcrypt.hash("user2", 5),
-      name: "user2",
-      role: "USER",
+      login: "andrei",
+      password: await bcrypt.hash("andrei", 5),
+      name: "andrei",
+      role: "ADMIN",
       status: "ACTIVE",
     },
   ]);
 
   await knex("board").insert([
     {
-      title: "board1",
-      description: "Sample board 1",
-      owner_id: 1,
+      title: "Demo",
+      description: "Demo",
+      owner_id: 3,
       created_at: new Date().toUTCString(),
     },
     {
-      title: "board2",
+      title: "Sample board 2",
       description: "Sample board 2",
-      owner_id: 2,
+      owner_id: 1,
       created_at: new Date().toUTCString(),
     },
   ]);
@@ -73,8 +73,8 @@ exports.seed = async function (knex) {
   await knex("user_board").insert([
     { user_id: 1, board_id: 1 },
     { user_id: 1, board_id: 2 },
-    { user_id: 2, board_id: 1 },
     { user_id: 2, board_id: 2 },
+    { user_id: 3, board_id: 1 },
     { user_id: 3, board_id: 2 },
   ]);
 
@@ -91,9 +91,9 @@ exports.seed = async function (knex) {
   ]);
 
   await knex("card").insert(
-    Array.from({ length: 30 }).map((_, idx) => {
+    Array.from({ length: 18 }).map((_, idx) => {
       const listId = getRndInteger(1, 4);
-      cards.push({ boardId: getRndInteger(1, 3), listId, cardId: idx + 1 });
+      cards.push({ boardId: 2, listId, cardId: idx + 1 });
       return {
         title: `Task ${idx + 1}`,
         description: `This is sample task ${idx + 1}`,
