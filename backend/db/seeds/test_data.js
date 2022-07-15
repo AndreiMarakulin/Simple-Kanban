@@ -91,9 +91,9 @@ exports.seed = async function (knex) {
   ]);
 
   await knex("card").insert(
-    Array.from({ length: 18 }).map((_, idx) => {
+    Array.from({ length: 30 }).map((_, idx) => {
       const listId = getRndInteger(1, 4);
-      cards.push({ boardId: 2, listId, cardId: idx + 1 });
+      cards.push({ boardId: getRndInteger(1, 3), listId, cardId: idx + 1 });
       return {
         title: `Task ${idx + 1}`,
         description: `This is sample task ${idx + 1}`,
